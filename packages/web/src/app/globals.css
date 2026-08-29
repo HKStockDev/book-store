@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f0e6d2;
+  --foreground: #3d2b1f;
+  --card: #f5ebd7;
+  --card-foreground: #3d2b1f;
+  --primary: #6b4c2a;
+  --primary-foreground: #f5ebd7;
+  --secondary: #e6d9c3;
+  --secondary-foreground: #4a3728;
+  --muted: #e6d9c3;
+  --muted-foreground: #7a6652;
+  --accent: #d4c4a8;
+  --accent-foreground: #4a3728;
+  --destructive: #e53935;
+  --border: #d4c4a8;
+  --input: #d4c4a8;
+  --ring: #6b4c2a;
+  --sidebar: #f5ebd7;
+  --sidebar-foreground: #3d2b1f;
+  --radius: 0.625rem;
+}
+
+[data-theme="dark"] {
+  --background: #121212;
+  --foreground: #f5f5f5;
+  --card: #1e1e1e;
+  --card-foreground: #f5f5f5;
+  --primary: #c9a96e;
+  --primary-foreground: #121212;
+  --secondary: #2a2a2a;
+  --secondary-foreground: #ffffff;
+  --muted: #2a2a2a;
+  --muted-foreground: #a0a0a0;
+  --accent: #333333;
+  --accent-foreground: #ffffff;
+  --destructive: #e53935;
+  --border: #333333;
+  --input: #333333;
+  --ring: #c9a96e;
+  --sidebar: #1a1a1a;
+  --sidebar-foreground: #f5f5f5;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground antialiased; }
+}
+
+@layer components {
+  .card { @apply rounded-xl border border-border bg-card p-6 shadow-sm; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50; }
+  .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 bg-primary text-primary-foreground hover:opacity-90; }
+  .btn-secondary { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 bg-secondary text-secondary-foreground hover:opacity-80; }
+  .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 hover:bg-accent; }
+  .input { @apply w-full rounded-lg border border-input bg-card px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring; }
+  .badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium; }
+  .stat-card { @apply rounded-xl border border-border bg-card p-6 shadow-sm flex flex-col gap-1; }
+}

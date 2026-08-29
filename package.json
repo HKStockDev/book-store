@@ -1,0 +1,17 @@
+{
+  "name": "book-store",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @book-store/web --filter @book-store/api dev",
+    "web:dev": "pnpm --filter @book-store/web dev",
+    "web:build": "pnpm --filter @book-store/web build",
+    "api:dev": "pnpm --filter @book-store/api dev",
+    "api:build": "pnpm --filter @book-store/api build",
+    "api:seed": "pnpm --filter @book-store/api seed",
+    "api:migrate": "pnpm --filter @book-store/api migrate",
+    "api:db:setup": "pnpm --filter @book-store/api db:setup",
+    "build": "pnpm web:build && pnpm api:build"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

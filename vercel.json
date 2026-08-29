@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd packages/web && pnpm install && pnpm run build",
+  "outputDirectory": "packages/web/.next",
+  "framework": "nextjs",
+  "installCommand": "pnpm install",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://book-store-api.onrender.com/api/:path*" }
+  ]
+}
