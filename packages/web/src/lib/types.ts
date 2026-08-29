@@ -40,6 +40,7 @@ export interface ContentItem {
   price: number | null;
   author?: string;
   cover_url?: string;
+  genre?: string | null;
   impressions: number;
   purchases: number;
   integration: string | null;

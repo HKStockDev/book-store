@@ -48,10 +48,13 @@ export const api = {
   },
 
   catalog: {
-    browse: (params?: { type?: string; search?: string }) => {
-      const q = new URLSearchParams(params as Record<string, string>).toString();
+    browse: (params?: { type?: string; genre?: string; search?: string }) => {
+      const q = new URLSearchParams(
+        Object.fromEntries(Object.entries(params ?? {}).filter(([, v]) => v)) as Record<string, string>,
+      ).toString();
       return request<ContentItem[]>(`/catalog${q ? `?${q}` : ""}`);
     },
+    categories: () => request<{ name: string; count: number }[]>("/catalog/categories"),
     get: (id: string) => request<ContentItem>(`/catalog/${id}`),
   },
 

@@ -133,14 +133,33 @@ export async function handleApiRequest(req: Request, pathSegments: string[]) {
     }
 
     // CATALOG (public)
+    if (path === "catalog/categories" && method === "GET") {
+      const { data, error: qErr } = await db
+        .from("content_items")
+        .select("genre")
+        .eq("status", "published")
+        .not("genre", "is", null);
+      if (qErr) return error(qErr.message, 500);
+      const counts: Record<string, number> = {};
+      for (const row of data ?? []) {
+        if (row.genre) counts[row.genre] = (counts[row.genre] ?? 0) + 1;
+      }
+      const categories = Object.entries(counts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+      return json(categories);
+    }
+
     if (path === "catalog" && method === "GET") {
       const url = new URL(req.url);
       let query = db.from("content_items").select("*, editorials(name)").eq("status", "published");
       const type = url.searchParams.get("type");
+      const genre = url.searchParams.get("genre");
       const search = url.searchParams.get("search");
       if (type) query = query.eq("type", type);
-      if (search) query = query.ilike("title", `%${search}%`);
-      const { data, error: qErr } = await query.order("published_at", { ascending: false });
+      if (genre) query = query.eq("genre", genre);
+      if (search) query = query.or(`title.ilike.%${search}%,author.ilike.%${search}%`);
+      const { data, error: qErr } = await query.order("published_at", { ascending: false }).limit(500);
       if (qErr) return error(qErr.message, 500);
       return json(data);
     }

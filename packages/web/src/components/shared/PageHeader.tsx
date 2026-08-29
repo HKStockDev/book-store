@@ -31,12 +31,12 @@ export function Badge({ children, className }: { children: React.ReactNode; clas
   return <span className={cn("badge bg-secondary text-secondary-foreground", className)}>{children}</span>;
 }
 
-export function ContentCard({ item, href }: { item: { id: string; title: string; type: string; price?: number | null; cover_url?: string; author?: string }; href: string }) {
+export function ContentCard({ item, href }: { item: { id: string; title: string; type: string; genre?: string | null; price?: number | null; cover_url?: string; author?: string }; href: string }) {
   return (
     <a href={href} className="group card overflow-hidden p-0 transition-shadow hover:shadow-md">
       <ContentCover coverUrl={item.cover_url} title={item.title} type={item.type} />
       <div className="p-4">
-        <p className="text-xs uppercase text-muted-foreground">{item.type}</p>
+        <p className="text-xs uppercase text-muted-foreground">{item.genre ?? item.type}</p>
         <h3 className="mt-1 font-semibold group-hover:text-primary">{item.title}</h3>
         {item.author && <p className="text-sm text-muted-foreground">{item.author}</p>}
         <p className="mt-2 text-sm font-medium">

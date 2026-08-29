@@ -6,6 +6,7 @@ import { BookOpen, DollarSign, LayoutDashboard, LogOut, Megaphone } from "lucide
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/auth-store";
 import { api } from "@/lib/api";
+import { SidebarMain, SidebarShell } from "./SidebarShell";
 
 const NAV = [
   { href: "/publisher", label: "Dashboard", icon: LayoutDashboard },
@@ -27,13 +28,24 @@ export function PublisherLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
-        <div className="border-b border-border p-6">
-          <h1 className="text-xl font-bold text-primary">IWWEI</h1>
-          <p className="text-xs text-muted-foreground">Portal editorial</p>
-        </div>
-        <nav className="flex-1 space-y-1 p-4">
+    <>
+      <SidebarShell
+        header={
+          <>
+            <h1 className="text-xl font-bold text-primary">IWWEI</h1>
+            <p className="text-xs text-muted-foreground">Portal editorial</p>
+          </>
+        }
+        footer={
+          <>
+            <p className="truncate text-sm font-medium">{user?.fullName}</p>
+            <button onClick={handleLogout} className="btn-ghost mt-2 w-full justify-start text-destructive">
+              <LogOut className="h-4 w-4" /> Cerrar sesión
+            </button>
+          </>
+        }
+      >
+        <nav className="space-y-1">
           {NAV.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
@@ -43,19 +55,13 @@ export function PublisherLayout({ children }: { children: React.ReactNode }) {
                 pathname === href ? "bg-primary text-primary-foreground" : "hover:bg-accent",
               )}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className="h-4 w-4 shrink-0" />
               {label}
             </Link>
           ))}
         </nav>
-        <div className="border-t border-border p-4">
-          <p className="truncate text-sm font-medium">{user?.fullName}</p>
-          <button onClick={handleLogout} className="btn-ghost mt-2 w-full justify-start text-destructive">
-            <LogOut className="h-4 w-4" /> Cerrar sesión
-          </button>
-        </div>
-      </aside>
-      <main className="flex-1 overflow-auto p-8">{children}</main>
-    </div>
+      </SidebarShell>
+      <SidebarMain>{children}</SidebarMain>
+    </>
   );
 }

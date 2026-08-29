@@ -102,6 +102,7 @@ CREATE TABLE public.content_items (
   price NUMERIC(10, 2),
   cover_url TEXT,
   author TEXT,
+  genre TEXT,
   impressions BIGINT NOT NULL DEFAULT 0,
   purchases INT NOT NULL DEFAULT 0,
   integration TEXT,

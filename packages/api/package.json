@@ -8,6 +8,7 @@
     "start": "node dist/main",
     "start:prod": "node dist/main",
     "seed": "node scripts/seed.cjs",
+    "seed:catalog": "node scripts/seed-catalog.cjs",
     "migrate": "node scripts/migrate.cjs",
     "db:setup": "node scripts/migrate.cjs && node scripts/seed.cjs"
   },
