@@ -7,6 +7,7 @@ import {
 } from "./supabase-server";
 import { getAppUrl, getStripe, SUBSCRIPTION_PLANS, type SubscriptionPlan } from "./stripe";
 import { getOrCreateStripeCustomer } from "./stripe-webhook";
+import { SUBSCRIPTION_PLANS as SUBSCRIPTION_PLANS_UI } from "./subscription-plans";
 
 export function json(data: unknown, status = 200) {
   return Response.json(data, { status });
@@ -43,12 +44,6 @@ const INTEREST_CATEGORIES = [
   "Ficción", "No ficción", "Cómics", "Podcasts", "Noticias",
   "Documentos", "Historia", "Ciencia", "Arte", "Infantil",
 ];
-
-const SUBSCRIPTION_PLANS_UI = {
-  basic: { name: "Básica", price: 4.99, features: ["Acceso a noticias", "5 descargas offline/mes"] },
-  premium: { name: "Premium", price: 9.99, features: ["Todo el catálogo", "Descargas ilimitadas", "Sin anuncios"] },
-  family: { name: "Familiar", price: 14.99, features: ["Hasta 5 perfiles", "Todo Premium", "Contenido infantil"] },
-};
 
 export async function handleApiRequest(req: Request, pathSegments: string[]) {
   const method = req.method;
@@ -410,9 +405,73 @@ export async function handleApiRequest(req: Request, pathSegments: string[]) {
     if (path === "lists" && method === "POST") {
       const auth = await requireAuth(req, ["user"]);
       if (auth.err) return auth.err;
-      const body = await parseBody<{ name: string }>(req);
-      const { data } = await db.from("user_lists").insert({ user_id: auth.user!.id, name: body.name }).select().single();
+      const body = await parseBody<{ name: string; isPublic?: boolean }>(req);
+      const { data } = await db.from("user_lists").insert({
+        user_id: auth.user!.id,
+        name: body.name,
+        is_public: body.isPublic ?? false,
+      }).select().single();
       return json(data);
+    }
+
+    if (path.match(/^lists\/[^/]+\/items$/) && method === "POST") {
+      const auth = await requireAuth(req, ["user"]);
+      if (auth.err) return auth.err;
+      const listId = pathSegments[1];
+      const body = await parseBody<{ contentId: string }>(req);
+      if (!body.contentId) return error("contentId required", 400);
+      const { data: list } = await db.from("user_lists").select("id").eq("id", listId).eq("user_id", auth.user!.id).single();
+      if (!list) return error("List not found", 404);
+      const { data: content } = await db.from("content_items").select("id").eq("id", body.contentId).eq("status", "published").single();
+      if (!content) return error("Content not found", 404);
+      const { data, error: insErr } = await db
+        .from("list_items")
+        .upsert({ list_id: listId, content_id: body.contentId }, { onConflict: "list_id,content_id" })
+        .select("*, content_items(title, type, cover_url)")
+        .single();
+      if (insErr) return error(insErr.message, 400);
+      return json(data);
+    }
+
+    if (path.match(/^lists\/[^/]+\/items\/[^/]+$/) && method === "DELETE") {
+      const auth = await requireAuth(req, ["user"]);
+      if (auth.err) return auth.err;
+      const listId = pathSegments[1];
+      const contentId = pathSegments[3];
+      const { data: list } = await db.from("user_lists").select("id").eq("id", listId).eq("user_id", auth.user!.id).single();
+      if (!list) return error("List not found", 404);
+      const { error: delErr } = await db.from("list_items").delete().eq("list_id", listId).eq("content_id", contentId);
+      if (delErr) return error(delErr.message, 400);
+      return json({ success: true });
+    }
+
+    if (path.match(/^lists\/[^/]+$/) && method === "PATCH") {
+      const auth = await requireAuth(req, ["user"]);
+      if (auth.err) return auth.err;
+      const listId = pathSegments[1];
+      const body = await parseBody<{ name?: string; isPublic?: boolean }>(req);
+      const updates: Record<string, unknown> = {};
+      if (body.name !== undefined) updates.name = body.name.trim();
+      if (body.isPublic !== undefined) updates.is_public = body.isPublic;
+      if (!Object.keys(updates).length) return error("No fields to update", 400);
+      const { data, error: updErr } = await db
+        .from("user_lists")
+        .update(updates)
+        .eq("id", listId)
+        .eq("user_id", auth.user!.id)
+        .select("*, list_items(content_id, content_items(title, type, cover_url))")
+        .single();
+      if (updErr) return error(updErr.message, 400);
+      return json(data);
+    }
+
+    if (path.match(/^lists\/[^/]+$/) && method === "DELETE") {
+      const auth = await requireAuth(req, ["user"]);
+      if (auth.err) return auth.err;
+      const listId = pathSegments[1];
+      const { error: delErr } = await db.from("user_lists").delete().eq("id", listId).eq("user_id", auth.user!.id);
+      if (delErr) return error(delErr.message, 400);
+      return json({ success: true });
     }
 
     // REVIEWS

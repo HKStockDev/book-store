@@ -83,8 +83,12 @@ export const api = {
 
   lists: {
     all: (token: string) => request<UserList[]>("/lists", {}, token),
-    create: (name: string, token: string) =>
-      request<UserList>("/lists", { method: "POST", body: JSON.stringify({ name }) }, token),
+    create: (name: string, token: string, isPublic = false) =>
+      request<UserList>("/lists", { method: "POST", body: JSON.stringify({ name, isPublic }) }, token),
+    update: (listId: string, data: { name?: string; isPublic?: boolean }, token: string) =>
+      request<UserList>(`/lists/${listId}`, { method: "PATCH", body: JSON.stringify(data) }, token),
+    delete: (listId: string, token: string) =>
+      request<{ success: boolean }>(`/lists/${listId}`, { method: "DELETE" }, token),
     addItem: (listId: string, contentId: string, token: string) =>
       request(`/lists/${listId}/items`, { method: "POST", body: JSON.stringify({ contentId }) }, token),
     removeItem: (listId: string, contentId: string, token: string) =>
