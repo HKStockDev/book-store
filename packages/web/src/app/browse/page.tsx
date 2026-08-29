@@ -7,12 +7,16 @@ import { ContentCard, PageHeader } from "@/components/shared/PageHeader";
 import { ContentListRow } from "@/components/shared/ContentListRow";
 import { ViewModeToggle, type ViewMode } from "@/components/shared/ViewModeToggle";
 import { api } from "@/lib/api";
+import { getContentRibbons } from "@/lib/content-ribbons";
+import { useAuthStore } from "@/lib/auth-store";
 import type { ContentItem } from "@/lib/types";
 import { cn, CONTENT_TYPE_LABELS } from "@/lib/utils";
 
 export default function BrowsePage() {
+  const getToken = useAuthStore((s) => s.getToken);
   const [items, setItems] = useState<ContentItem[]>([]);
   const [categories, setCategories] = useState<{ name: string; count: number }[]>([]);
+  const [ownedIds, setOwnedIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [type, setType] = useState("");
   const [genre, setGenre] = useState("");
@@ -22,6 +26,14 @@ export default function BrowsePage() {
   useEffect(() => {
     api.catalog.categories().then(setCategories).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) return;
+    api.library.list(token)
+      .then((library) => setOwnedIds(new Set(library.map((entry) => entry.content_items.id))))
+      .catch(console.error);
+  }, [getToken]);
 
   useEffect(() => {
     setLoading(true);
@@ -104,7 +116,7 @@ export default function BrowsePage() {
             <p className="mb-4 text-sm text-muted-foreground">{items.length} resultados</p>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               {items.map((item) => (
-                <ContentCard key={item.id} item={item} href={`/content/${item.id}`} />
+                <ContentCard key={item.id} item={item} href={`/content/${item.id}`} ownedIds={ownedIds} />
               ))}
             </div>
           </>
@@ -122,6 +134,7 @@ export default function BrowsePage() {
                   author={item.author}
                   subtitle={item.genre ?? item.editorials?.name}
                   price={item.price}
+                  ribbons={getContentRibbons(item, { contentId: item.id, ownedIds })}
                 />
               ))}
             </div>

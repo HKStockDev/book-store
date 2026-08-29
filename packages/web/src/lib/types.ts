@@ -10,6 +10,13 @@ export interface AuthUser {
   avatarUrl?: string | null;
 }
 
+export interface ActivityHistory {
+  months: string[];
+  reading: number[];
+  reviews: number[];
+  purchases: number[];
+}
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -27,6 +34,7 @@ export interface UserProfile {
     reviewsCount: number;
     purchasesCount: number;
   };
+  activityHistory: ActivityHistory;
   recentPayments: Payment[];
 }
 
@@ -134,7 +142,17 @@ export interface UserList {
   id: string;
   name: string;
   is_public: boolean;
-  list_items?: { content_id: string; content_items: { title: string; type: string; cover_url?: string } }[];
+  list_items?: {
+    content_id: string;
+    content_items: {
+      title: string;
+      type: string;
+      cover_url?: string;
+      price?: number | null;
+      published_at?: string | null;
+      purchases?: number;
+    };
+  }[];
 }
 
 export interface LibraryItem {

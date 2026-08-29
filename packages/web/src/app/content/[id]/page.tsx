@@ -8,7 +8,9 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { UserLayout } from "@/components/layout/UserLayout";
 import { Badge } from "@/components/shared/PageHeader";
 import { ContentCover } from "@/components/shared/ContentCover";
+import { ContentRibbonStrip } from "@/components/shared/ContentRibbon";
 import { api } from "@/lib/api";
+import { getContentRibbons } from "@/lib/content-ribbons";
 import { useAuthStore } from "@/lib/auth-store";
 import type { ContentItem } from "@/lib/types";
 import { CONTENT_TYPE_LABELS, formatCurrency } from "@/lib/utils";
@@ -17,12 +19,28 @@ export default function ContentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const getToken = useAuthStore((s) => s.getToken);
   const [item, setItem] = useState<ContentItem | null>(null);
+  const [ownedIds, setOwnedIds] = useState<Set<string>>(new Set());
+  const [offlineAvailable, setOfflineAvailable] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
 
   useEffect(() => {
     if (id) api.catalog.get(id).then(setItem).catch(console.error);
   }, [id]);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token || !id) return;
+    api.library.list(token)
+      .then((library) => {
+        const entry = library.find((row) => row.content_items.id === id);
+        if (entry) {
+          setOwnedIds(new Set([id]));
+          setOfflineAvailable(entry.offline_available);
+        }
+      })
+      .catch(console.error);
+  }, [getToken, id]);
 
   const handlePurchase = async () => {
     const token = getToken();
@@ -50,6 +68,12 @@ export default function ContentDetailPage() {
 
   if (!item) return <ProtectedRoute roles={["user"]}><UserLayout><p>Cargando...</p></UserLayout></ProtectedRoute>;
 
+  const ribbons = getContentRibbons(item, {
+    contentId: item.id,
+    ownedIds,
+    offline: offlineAvailable,
+  });
+
   return (
     <ProtectedRoute roles={["user"]}>
       <UserLayout>
@@ -60,12 +84,16 @@ export default function ContentDetailPage() {
               title={item.title}
               type={item.type}
               variant="hero"
+              ribbons={ribbons}
             />
           </div>
           <div className="lg:col-span-2 space-y-6">
             <div>
-              <Badge>{CONTENT_TYPE_LABELS[item.type] ?? item.type}</Badge>
-              {item.integration && <Badge className="ml-2 bg-primary/10 text-primary">{item.integration}</Badge>}
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge>{CONTENT_TYPE_LABELS[item.type] ?? item.type}</Badge>
+                {item.integration && <Badge className="bg-primary/10 text-primary">{item.integration}</Badge>}
+                <ContentRibbonStrip kinds={ribbons} size="md" />
+              </div>
               <h1 className="mt-2 text-3xl font-bold">{item.title}</h1>
               {item.author && <p className="text-muted-foreground">{item.author}</p>}
               {item.editorials && <p className="text-sm text-muted-foreground">{item.editorials.name}</p>}

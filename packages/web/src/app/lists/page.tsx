@@ -14,6 +14,7 @@ import { ContentListRow } from "@/components/shared/ContentListRow";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ViewModeToggle, type ViewMode } from "@/components/shared/ViewModeToggle";
 import { api } from "@/lib/api";
+import { getContentRibbons } from "@/lib/content-ribbons";
 import { useAuthStore } from "@/lib/auth-store";
 import type { UserList } from "@/lib/types";
 import { cn, CONTENT_TYPE_LABELS } from "@/lib/utils";
@@ -27,10 +28,16 @@ export default function ListsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [addDialogList, setAddDialogList] = useState<UserList | null>(null);
+  const [ownedIds, setOwnedIds] = useState<Set<string>>(new Set());
 
   const load = () => {
     const token = getToken();
-    if (token) api.lists.all(token).then(setLists).catch(console.error);
+    if (token) {
+      api.lists.all(token).then(setLists).catch(console.error);
+      api.library.list(token)
+        .then((library) => setOwnedIds(new Set(library.map((entry) => entry.content_items.id))))
+        .catch(console.error);
+    }
   };
 
   useEffect(load, [getToken]);
@@ -229,45 +236,58 @@ export default function ListsPage() {
                     <p className="mt-4 text-center text-sm text-muted-foreground">Lista vacía</p>
                   ) : viewMode === "grid" ? (
                     <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                      {list.list_items.map((li) => (
+                      {list.list_items.map((li) => {
+                        const content = li.content_items;
+                        const ribbons = content
+                          ? getContentRibbons(content, { contentId: li.content_id, ownedIds })
+                          : [];
+                        return (
                         <div key={li.content_id} className="group relative overflow-hidden rounded-lg border border-border">
                           <button
                             type="button"
                             onClick={() => removeItem(list.id, li.content_id)}
-                            className="absolute right-1 top-1 z-10 rounded-full bg-background/90 p-1 opacity-0 shadow transition-opacity group-hover:opacity-100"
+                            className="absolute right-1 top-1 z-20 rounded-full bg-background/90 p-1 opacity-0 shadow transition-opacity group-hover:opacity-100"
                             title="Quitar de la lista"
                           >
                             <X className="h-3 w-3 text-destructive" />
                           </button>
                           <Link href={`/content/${li.content_id}`} className="block">
                             <ContentCover
-                              coverUrl={li.content_items?.cover_url}
-                              title={li.content_items?.title ?? ""}
-                              type={li.content_items?.type}
+                              coverUrl={content?.cover_url}
+                              title={content?.title ?? ""}
+                              type={content?.type}
+                              ribbons={ribbons}
                             />
                             <div className="p-2">
                               <p className="truncate text-xs font-medium group-hover:text-primary">
-                                {li.content_items?.title}
+                                {content?.title}
                               </p>
-                              {li.content_items?.type && (
+                              {content?.type && (
                                 <p className="text-[10px] text-muted-foreground">
-                                  {CONTENT_TYPE_LABELS[li.content_items.type] ?? li.content_items.type}
+                                  {CONTENT_TYPE_LABELS[content.type] ?? content.type}
                                 </p>
                               )}
                             </div>
                           </Link>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <ul className="mt-4 space-y-2">
-                      {list.list_items.map((li) => (
+                      {list.list_items.map((li) => {
+                        const content = li.content_items;
+                        const ribbons = content
+                          ? getContentRibbons(content, { contentId: li.content_id, ownedIds })
+                          : [];
+                        return (
                         <li key={li.content_id} className="group relative">
                           <ContentListRow
                             href={`/content/${li.content_id}`}
-                            title={li.content_items?.title ?? ""}
-                            type={li.content_items?.type}
-                            coverUrl={li.content_items?.cover_url}
+                            title={content?.title ?? ""}
+                            type={content?.type}
+                            coverUrl={content?.cover_url}
+                            ribbons={ribbons}
                             className="p-3 pr-12"
                           />
                           <button
@@ -282,7 +302,8 @@ export default function ListsPage() {
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </li>
-                      ))}
+                        );
+                      })}
                     </ul>
                   )}
                 </div>

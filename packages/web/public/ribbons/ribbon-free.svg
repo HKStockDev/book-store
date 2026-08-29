@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" fill="none">
+  <path d="M0 0H52L0 52V0Z" fill="#15803D"/>
+  <path d="M52 0L72 20V0H52Z" fill="#166534"/>
+  <path d="M0 52L20 72H0V52Z" fill="#166534"/>
+  <text x="8" y="32" fill="#F0FDF4" font-family="system-ui,sans-serif" font-size="8.5" font-weight="700" transform="rotate(-45 8 32)">GRATIS</text>
+</svg>

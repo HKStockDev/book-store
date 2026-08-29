@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" fill="none">
+  <path d="M0 0H52L0 52V0Z" fill="#C2410C"/>
+  <path d="M52 0L72 20V0H52Z" fill="#9A3412"/>
+  <path d="M0 52L20 72H0V52Z" fill="#9A3412"/>
+  <text x="14" y="34" fill="#FFF7ED" font-family="system-ui,sans-serif" font-size="9" font-weight="700" transform="rotate(-45 14 34)">TOP</text>
+</svg>

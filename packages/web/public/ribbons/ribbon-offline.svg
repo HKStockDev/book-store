@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" fill="none">
+  <path d="M0 0H52L0 52V0Z" fill="#1D4ED8"/>
+  <path d="M52 0L72 20V0H52Z" fill="#1E40AF"/>
+  <path d="M0 52L20 72H0V52Z" fill="#1E40AF"/>
+  <text x="6" y="30" fill="#EFF6FF" font-family="system-ui,sans-serif" font-size="7" font-weight="700" transform="rotate(-45 6 30)">OFFLINE</text>
+</svg>

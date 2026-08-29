@@ -5,6 +5,7 @@ import { Plus, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { ContentCover } from "@/components/shared/ContentCover";
 import { api } from "@/lib/api";
+import { getContentRibbons } from "@/lib/content-ribbons";
 import type { ContentItem } from "@/lib/types";
 import { CONTENT_TYPE_LABELS } from "@/lib/utils";
 
@@ -96,6 +97,7 @@ export function AddToListDialog({
                       type={item.type}
                       className="w-10 rounded"
                       aspectClass="aspect-[3/4]"
+                      ribbons={getContentRibbons(item, { contentId: item.id })}
                     />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{item.title}</p>

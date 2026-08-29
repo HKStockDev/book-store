@@ -1,6 +1,8 @@
 import Link from "next/link";
+import type { ContentRibbonKind } from "@/lib/content-ribbons";
 import { ContentCover } from "./ContentCover";
 import { Badge } from "./PageHeader";
+import { ContentRibbonStrip } from "./ContentRibbon";
 import { CONTENT_TYPE_LABELS, cn, formatCurrency } from "@/lib/utils";
 
 export function ContentListRow({
@@ -12,6 +14,7 @@ export function ContentListRow({
   subtitle,
   price,
   trailing,
+  ribbons = [],
   className,
 }: {
   href?: string;
@@ -22,6 +25,7 @@ export function ContentListRow({
   subtitle?: string | null;
   price?: number | null;
   trailing?: React.ReactNode;
+  ribbons?: ContentRibbonKind[];
   className?: string;
 }) {
   const inner = (
@@ -36,6 +40,7 @@ export function ContentListRow({
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           {type && <Badge>{CONTENT_TYPE_LABELS[type] ?? type}</Badge>}
+          <ContentRibbonStrip kinds={ribbons} />
         </div>
         <h3 className="mt-1 truncate font-semibold">{title}</h3>
         {author && <p className="truncate text-sm text-muted-foreground">{author}</p>}

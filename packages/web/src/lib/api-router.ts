@@ -45,6 +45,37 @@ const INTEREST_CATEGORIES = [
   "Documentos", "Historia", "Ciencia", "Arte", "Infantil",
 ];
 
+function buildActivityHistory(
+  library: { last_read_at: string | null }[],
+  reviews: { created_at: string }[],
+  purchases: { created_at: string }[],
+  monthCount = 6,
+) {
+  const now = new Date();
+  const months: string[] = [];
+  const reading: number[] = [];
+  const reviewCounts: number[] = [];
+  const purchaseCounts: number[] = [];
+
+  for (let i = monthCount - 1; i >= 0; i--) {
+    const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59, 999);
+    const label = monthStart.toLocaleDateString("es-ES", { month: "short" });
+    months.push(label.charAt(0).toUpperCase() + label.slice(1));
+
+    const inMonth = (dateStr: string) => {
+      const date = new Date(dateStr);
+      return date >= monthStart && date <= monthEnd;
+    };
+
+    reading.push(library.filter((item) => item.last_read_at && inMonth(item.last_read_at)).length);
+    reviewCounts.push(reviews.filter((item) => inMonth(item.created_at)).length);
+    purchaseCounts.push(purchases.filter((item) => inMonth(item.created_at)).length);
+  }
+
+  return { months, reading, reviews: reviewCounts, purchases: purchaseCounts };
+}
+
 export async function handleApiRequest(req: Request, pathSegments: string[]) {
   const method = req.method;
   const path = pathSegments.join("/");
@@ -328,6 +359,9 @@ export async function handleApiRequest(req: Request, pathSegments: string[]) {
         { count: reviewsCount },
         { count: purchasesCount },
         { data: recentPayments },
+        { data: libraryActivity },
+        { data: reviewActivity },
+        { data: purchaseActivity },
       ] = await Promise.all([
         db.from("profiles").select("*").eq("id", userId).single(),
         db.from("user_interests").select("category").eq("user_id", userId),
@@ -337,9 +371,18 @@ export async function handleApiRequest(req: Request, pathSegments: string[]) {
         db.from("reviews").select("id", { count: "exact", head: true }).eq("user_id", userId),
         db.from("payments").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("status", "completed"),
         db.from("payments").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(5),
+        db.from("user_library").select("last_read_at").eq("user_id", userId).not("last_read_at", "is", null),
+        db.from("reviews").select("created_at").eq("user_id", userId),
+        db.from("payments").select("created_at").eq("user_id", userId).eq("type", "purchase").eq("status", "completed"),
       ]);
 
       if (!profile) return error("Profile not found", 404);
+
+      const activityHistory = buildActivityHistory(
+        libraryActivity ?? [],
+        reviewActivity ?? [],
+        purchaseActivity ?? [],
+      );
 
       return json({
         id: profile.id,
@@ -358,6 +401,7 @@ export async function handleApiRequest(req: Request, pathSegments: string[]) {
           reviewsCount: reviewsCount ?? 0,
           purchasesCount: purchasesCount ?? 0,
         },
+        activityHistory,
         recentPayments: recentPayments ?? [],
       });
     }
@@ -398,7 +442,7 @@ export async function handleApiRequest(req: Request, pathSegments: string[]) {
     if (path === "lists" && method === "GET") {
       const auth = await requireAuth(req, ["user"]);
       if (auth.err) return auth.err;
-      const { data } = await db.from("user_lists").select("*, list_items(content_id, content_items(title, type, cover_url))").eq("user_id", auth.user!.id).order("created_at", { ascending: false });
+      const { data } = await db.from("user_lists").select("*, list_items(content_id, content_items(title, type, cover_url, price, published_at, purchases))").eq("user_id", auth.user!.id).order("created_at", { ascending: false });
       return json(data ?? []);
     }
 
@@ -459,7 +503,7 @@ export async function handleApiRequest(req: Request, pathSegments: string[]) {
         .update(updates)
         .eq("id", listId)
         .eq("user_id", auth.user!.id)
-        .select("*, list_items(content_id, content_items(title, type, cover_url))")
+        .select("*, list_items(content_id, content_items(title, type, cover_url, price, published_at, purchases))")
         .single();
       if (updErr) return error(updErr.message, 400);
       return json(data);

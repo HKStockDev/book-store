@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" fill="none">
+  <path d="M0 0H52L0 52V0Z" fill="#6B4C2A"/>
+  <path d="M52 0L72 20V0H52Z" fill="#553A22"/>
+  <path d="M0 52L20 72H0V52Z" fill="#553A22"/>
+  <text x="12" y="34" fill="#F5EBD7" font-family="system-ui,sans-serif" font-size="9" font-weight="700" transform="rotate(-45 12 34)">TUYO</text>
+</svg>
