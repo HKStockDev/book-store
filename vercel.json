@@ -1,9 +1,7 @@
 {
-  "buildCommand": "cd packages/web && pnpm install && pnpm run build",
-  "outputDirectory": "packages/web/.next",
-  "framework": "nextjs",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "pnpm install",
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "https://book-store-api.onrender.com/api/:path*" }
-  ]
+  "buildCommand": "pnpm --filter @book-store/web build",
+  "framework": "nextjs",
+  "rootDirectory": "packages/web"
 }
