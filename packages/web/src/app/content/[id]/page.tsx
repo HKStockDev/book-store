@@ -55,9 +55,12 @@ export default function ContentDetailPage() {
       <UserLayout>
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-1">
-            <div className="card overflow-hidden p-0">
-              <ContentCover coverUrl={item.cover_url} title={item.title} />
-            </div>
+            <ContentCover
+              coverUrl={item.cover_url}
+              title={item.title}
+              type={item.type}
+              variant="hero"
+            />
           </div>
           <div className="lg:col-span-2 space-y-6">
             <div>

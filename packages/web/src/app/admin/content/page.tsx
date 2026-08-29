@@ -69,7 +69,7 @@ export default function AdminContentPage() {
               {items.map((item) => (
                 <tr key={item.id} className="border-b border-border align-top">
                   <td className="p-3">
-                    <ContentCover coverUrl={item.cover_url} title={item.title} className="w-12 rounded-md" />
+                    <ContentCover coverUrl={item.cover_url} title={item.title} type={item.type} className="w-12 rounded-md" />
                   </td>
                   <td className="p-3">
                     <div>{item.title}</div>

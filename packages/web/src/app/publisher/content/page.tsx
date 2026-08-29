@@ -123,7 +123,7 @@ export default function PublisherContentPage() {
           />
           <div className="flex flex-wrap items-end gap-4">
             {form.cover_url && (
-              <ContentCover coverUrl={form.cover_url} title={form.title || "Vista previa"} className="w-24 rounded-md" />
+              <ContentCover coverUrl={form.cover_url} title={form.title || "Vista previa"} type={form.type} className="w-24 rounded-md" />
             )}
             <button type="submit" className="btn-primary">Publicar</button>
           </div>
@@ -132,7 +132,7 @@ export default function PublisherContentPage() {
           {items.map((item) => (
             <div key={item.id} className="card">
               <div className="flex items-start gap-4">
-                <ContentCover coverUrl={item.cover_url} title={item.title} className="w-16 rounded-md" />
+                <ContentCover coverUrl={item.cover_url} title={item.title} type={item.type} className="w-16 rounded-md" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div>
