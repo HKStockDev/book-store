@@ -8,11 +8,9 @@ import { toast } from "sonner";
 import { getHomeForRole } from "@/lib/auth-utils";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
-import { useAuthHydrated } from "@/lib/use-auth-hydrated";
 
 export default function LoginPage() {
   const router = useRouter();
-  const hydrated = useAuthHydrated();
   const user = useAuthStore((s) => s.user);
   const setAuth = useAuthStore((s) => s.setAuth);
   const [email, setEmail] = useState("");
@@ -20,10 +18,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (hydrated && user) {
+    if (user) {
       router.replace(getHomeForRole(user.role));
     }
-  }, [hydrated, user, router]);
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,13 +38,7 @@ export default function LoginPage() {
     }
   };
 
-  if (!hydrated || user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background p-4 text-muted-foreground">
-        Cargando...
-      </div>
-    );
-  }
+  if (user) return null;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">

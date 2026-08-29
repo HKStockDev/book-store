@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Badge, PageHeader } from "@/components/shared/PageHeader";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
@@ -19,8 +17,7 @@ export default function AdminPromotionsPage() {
   }, [getToken]);
 
   return (
-    <ProtectedRoute roles={["admin"]}>
-      <AdminLayout>
+    <>
         <PageHeader title="Promociones" description="Campañas promocionales de editoriales" />
         <div className="grid gap-4">
           {promotions.map((p) => (
@@ -41,7 +38,6 @@ export default function AdminPromotionsPage() {
             </div>
           ))}
         </div>
-      </AdminLayout>
-    </ProtectedRoute>
+    </>
   );
 }

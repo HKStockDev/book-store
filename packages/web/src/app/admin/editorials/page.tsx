@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Badge, PageHeader } from "@/components/shared/PageHeader";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
@@ -27,8 +25,7 @@ export default function AdminEditorialsPage() {
   };
 
   return (
-    <ProtectedRoute roles={["admin"]}>
-      <AdminLayout>
+    <>
         <PageHeader title="Editoriales" description="Gestión de editoriales y publishers" />
         <div className="grid gap-4">
           {editorials.map((ed) => (
@@ -54,7 +51,6 @@ export default function AdminEditorialsPage() {
             </div>
           ))}
         </div>
-      </AdminLayout>
-    </ProtectedRoute>
+    </>
   );
 }

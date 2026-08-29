@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Badge, PageHeader } from "@/components/shared/PageHeader";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
@@ -27,8 +25,7 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <ProtectedRoute roles={["admin"]}>
-      <AdminLayout>
+    <>
         <PageHeader title="Usuarios" description="Gestión de cuentas de usuario" />
         <div className="card overflow-x-auto p-0">
           <table className="w-full text-sm">
@@ -55,7 +52,6 @@ export default function AdminUsersPage() {
             </tbody>
           </table>
         </div>
-      </AdminLayout>
-    </ProtectedRoute>
+    </>
   );
 }

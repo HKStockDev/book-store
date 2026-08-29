@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { AdminLayout } from "@/components/layout/AdminLayout";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
@@ -17,8 +15,7 @@ export default function AdminSettingsPage() {
   }, [getToken]);
 
   return (
-    <ProtectedRoute roles={["admin"]}>
-      <AdminLayout>
+    <>
         <PageHeader title="Configuración" description="Ajustes de plataforma e integraciones" />
         <div className="grid gap-6 md:grid-cols-2">
           <div className="card">
@@ -45,7 +42,6 @@ export default function AdminSettingsPage() {
             </div>
           </div>
         </div>
-      </AdminLayout>
-    </ProtectedRoute>
+    </>
   );
 }

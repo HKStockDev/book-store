@@ -12,6 +12,8 @@ export function ProtectedRoute({ roles, children }: { roles?: UserRole[]; childr
   const hydrated = useAuthHydrated();
   const user = useAuthStore((s) => s.user);
 
+  const roleAllowed = !roles || (!!user && roles.includes(user.role));
+
   useEffect(() => {
     if (!hydrated) return;
 
@@ -25,15 +27,8 @@ export function ProtectedRoute({ roles, children }: { roles?: UserRole[]; childr
     }
   }, [hydrated, user, roles, router]);
 
-  if (!hydrated) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center text-muted-foreground">
-        Cargando sesión...
-      </div>
-    );
-  }
+  if (user && roleAllowed) return <>{children}</>;
+  if (!hydrated) return null;
 
-  if (!user || (roles && !roles.includes(user.role))) return null;
-
-  return <>{children}</>;
+  return null;
 }

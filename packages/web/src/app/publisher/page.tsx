@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { PublisherLayout } from "@/components/layout/PublisherLayout";
 import { PageHeader, StatCard } from "@/components/shared/PageHeader";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
@@ -19,15 +17,13 @@ export default function PublisherDashboardPage() {
   }, [getToken]);
 
   return (
-    <ProtectedRoute roles={["publisher"]}>
-      <PublisherLayout>
+    <>
         <PageHeader title="Dashboard editorial" description="Resumen de tu editorial" />
         <div className="grid gap-4 sm:grid-cols-3">
           <StatCard label="Contenidos" value={stats?.editorialContent ?? 0} />
           <StatCard label="Impresiones" value={formatNumber(stats?.editorialImpressions ?? 0)} />
           <StatCard label="Ingresos" value={formatCurrency(stats?.editorialRevenue ?? 0)} />
         </div>
-      </PublisherLayout>
-    </ProtectedRoute>
+    </>
   );
 }

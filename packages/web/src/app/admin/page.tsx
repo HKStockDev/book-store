@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { AdminLayout } from "@/components/layout/AdminLayout";
 import { PageHeader, StatCard } from "@/components/shared/PageHeader";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
@@ -19,8 +17,7 @@ export default function AdminDashboardPage() {
   }, [getToken]);
 
   return (
-    <ProtectedRoute roles={["admin"]}>
-      <AdminLayout>
+    <>
         <PageHeader title="Dashboard" description="Vista general de la plataforma IWWEI" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label="Usuarios" value={formatNumber(stats?.totalUsers ?? 0)} />
@@ -32,7 +29,6 @@ export default function AdminDashboardPage() {
           <StatCard label="Liquidaciones pendientes" value={stats?.pendingSettlements ?? 0} />
           <StatCard label="Promociones activas" value={stats?.activePromotions ?? 0} />
         </div>
-      </AdminLayout>
-    </ProtectedRoute>
+    </>
   );
 }

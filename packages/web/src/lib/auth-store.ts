@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { readPersistedUser } from "./auth-storage";
 import type { AuthUser } from "./types";
 
 interface AuthState {
@@ -15,7 +16,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      user: null,
+      user: readPersistedUser(),
       setAuth: (user) => set({ user }),
       updateUser: (updates) =>
         set((state) => ({

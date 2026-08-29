@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { AdminLayout } from "@/components/layout/AdminLayout";
 import { ContentCover } from "@/components/shared/ContentCover";
 import { Badge, PageHeader } from "@/components/shared/PageHeader";
 import { api } from "@/lib/api";
@@ -55,8 +53,7 @@ export default function AdminContentPage() {
   };
 
   return (
-    <ProtectedRoute roles={["admin"]}>
-      <AdminLayout>
+    <>
         <PageHeader title="Contenido" description="Gestión de publicaciones" />
         <div className="card overflow-x-auto p-0">
           <table className="w-full text-sm">
@@ -114,7 +111,6 @@ export default function AdminContentPage() {
             </tbody>
           </table>
         </div>
-      </AdminLayout>
-    </ProtectedRoute>
+    </>
   );
 }

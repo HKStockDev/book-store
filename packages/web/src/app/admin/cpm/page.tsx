@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { AdminLayout } from "@/components/layout/AdminLayout";
 import { Badge, PageHeader, StatCard } from "@/components/shared/PageHeader";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
@@ -45,8 +43,7 @@ export default function AdminCpmPage() {
   const totalPending = settlements.filter((s) => s.status === "pending").reduce((a, s) => a + Number(s.amount), 0);
 
   return (
-    <ProtectedRoute roles={["admin"]}>
-      <AdminLayout>
+    <>
         <PageHeader title="Sistema CPM" description="Métricas de impresiones y liquidación a editoriales">
           <div className="flex gap-2">
             <input className="input max-w-[140px]" value={period} onChange={(e) => setPeriod(e.target.value)} />
@@ -84,7 +81,6 @@ export default function AdminCpmPage() {
             </tbody>
           </table>
         </div>
-      </AdminLayout>
-    </ProtectedRoute>
+    </>
   );
 }

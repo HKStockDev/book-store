@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { PublisherLayout } from "@/components/layout/PublisherLayout";
 import { Badge, PageHeader } from "@/components/shared/PageHeader";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
@@ -19,8 +17,7 @@ export default function PublisherPromotionsPage() {
   }, [getToken]);
 
   return (
-    <ProtectedRoute roles={["publisher"]}>
-      <PublisherLayout>
+    <>
         <PageHeader title="Promociones" description="Herramienta de promoción e informes" />
         <div className="grid gap-4">
           {promotions.map((p) => (
@@ -39,7 +36,6 @@ export default function PublisherPromotionsPage() {
             </div>
           ))}
         </div>
-      </PublisherLayout>
-    </ProtectedRoute>
+    </>
   );
 }

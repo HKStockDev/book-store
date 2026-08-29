@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { AdminLayout } from "@/components/layout/AdminLayout";
 import { PageHeader, StatCard } from "@/components/shared/PageHeader";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
@@ -18,8 +16,7 @@ export default function AdminReportsPage() {
   }, [getToken]);
 
   return (
-    <ProtectedRoute roles={["admin"]}>
-      <AdminLayout>
+    <>
         <PageHeader title="Informes" description="Reporting y analytics de la plataforma" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label="Usuarios activos" value={formatNumber(Number(report?.activeUsers ?? 0))} />
@@ -40,7 +37,6 @@ export default function AdminReportsPage() {
             </div>
           </div>
         )}
-      </AdminLayout>
-    </ProtectedRoute>
+    </>
   );
 }

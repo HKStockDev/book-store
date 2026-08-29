@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { PublisherLayout } from "@/components/layout/PublisherLayout";
 import { Badge, PageHeader } from "@/components/shared/PageHeader";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
@@ -19,8 +17,7 @@ export default function PublisherCpmPage() {
   }, [getToken]);
 
   return (
-    <ProtectedRoute roles={["publisher"]}>
-      <PublisherLayout>
+    <>
         <PageHeader title="Liquidaciones CPM" description="Informes de impresiones y pagos" />
         <div className="space-y-4">
           {settlements.map((s) => (
@@ -36,7 +33,6 @@ export default function PublisherCpmPage() {
             </div>
           ))}
         </div>
-      </PublisherLayout>
-    </ProtectedRoute>
+    </>
   );
 }

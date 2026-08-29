@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { PublisherLayout } from "@/components/layout/PublisherLayout";
 import { ContentCover } from "@/components/shared/ContentCover";
 import { Badge, PageHeader } from "@/components/shared/PageHeader";
 import { api } from "@/lib/api";
@@ -89,8 +87,7 @@ export default function PublisherContentPage() {
   };
 
   return (
-    <ProtectedRoute roles={["publisher"]}>
-      <PublisherLayout>
+    <>
         <PageHeader title="Mis publicaciones" description="Sube y gestiona tu contenido" />
         <form onSubmit={create} className="card mb-6 space-y-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -181,7 +178,6 @@ export default function PublisherContentPage() {
             </div>
           ))}
         </div>
-      </PublisherLayout>
-    </ProtectedRoute>
+    </>
   );
 }
