@@ -24,6 +24,6 @@ export const useAuthStore = create<AuthState>()(
       clearAuth: () => set({ user: null }),
       getToken: () => get().user?.accessToken ?? null,
     }),
-    { name: "iwwei-auth" },
+    { name: "iwwei-auth", partialize: (state) => ({ user: state.user }) },
   ),
 );

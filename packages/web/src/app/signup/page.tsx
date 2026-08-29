@@ -1,18 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import { toast } from "sonner";
+import { getHomeForRole } from "@/lib/auth-utils";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
+import { useAuthHydrated } from "@/lib/use-auth-hydrated";
 
 export default function SignupPage() {
   const router = useRouter();
+  const hydrated = useAuthHydrated();
+  const user = useAuthStore((s) => s.user);
   const setAuth = useAuthStore((s) => s.setAuth);
   const [form, setForm] = useState({ email: "", password: "", fullName: "", role: "user", editorialName: "" });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (hydrated && user) {
+      router.replace(getHomeForRole(user.role));
+    }
+  }, [hydrated, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +44,14 @@ export default function SignupPage() {
       setLoading(false);
     }
   };
+
+  if (!hydrated || user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background p-4 text-muted-foreground">
+        Cargando...
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
