@@ -26,11 +26,10 @@ export default function SubscriptionPage() {
     const token = getToken();
     if (!token) return;
     try {
-      const sub = await api.subscriptions.subscribe(plan, token);
-      setCurrent(sub);
-      toast.success("Suscripción activada");
+      const { url } = await api.stripe.checkoutSubscription(plan, token);
+      if (url) window.location.href = url;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error");
+      toast.error(err instanceof Error ? err.message : "Error al iniciar pago");
     }
   };
 

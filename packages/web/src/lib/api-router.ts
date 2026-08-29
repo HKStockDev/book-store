@@ -1,71 +1,12 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
-
-let adminClient: SupabaseClient | null = null;
-let anonClient: SupabaseClient | null = null;
-
-function getEnv(name: string) {
-  const value = process.env[name];
-  if (!value) throw new Error(`Missing environment variable: ${name}`);
-  return value;
-}
-
-export function getAdminClient() {
-  if (!adminClient) {
-    adminClient = createClient(getEnv("SUPABASE_URL"), getEnv("SUPABASE_SERVICE_ROLE_KEY"), {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
-  }
-  return adminClient;
-}
-
-export function getAnonClient() {
-  if (!anonClient) {
-    anonClient = createClient(getEnv("SUPABASE_URL"), getEnv("SUPABASE_ANON_KEY"));
-  }
-  return anonClient;
-}
-
-export type AuthUser = {
-  id: string;
-  email: string;
-  role: "admin" | "publisher" | "user";
-  fullName: string | null;
-  editorialId: string | null;
-  accessToken: string;
-};
-
-export async function getUserFromToken(token: string): Promise<AuthUser | null> {
-  const { data, error } = await getAnonClient().auth.getUser(token);
-  if (error || !data.user) return null;
-
-  const { data: profile } = await getAdminClient()
-    .from("profiles")
-    .select("*")
-    .eq("id", data.user.id)
-    .single();
-
-  if (!profile) return null;
-
-  return {
-    id: profile.id,
-    email: profile.email,
-    role: profile.role,
-    fullName: profile.full_name,
-    editorialId: profile.editorial_id,
-    accessToken: token,
-  };
-}
-
-export function toAuthUser(profile: Record<string, unknown>, accessToken: string): AuthUser {
-  return {
-    id: profile.id as string,
-    email: profile.email as string,
-    role: profile.role as AuthUser["role"],
-    fullName: profile.full_name as string | null,
-    editorialId: profile.editorial_id as string | null,
-    accessToken,
-  };
-}
+import {
+  getAdminClient,
+  getAnonClient,
+  getUserFromToken,
+  toAuthUser,
+  type AuthUser,
+} from "./supabase-server";
+import { getAppUrl, getStripe, SUBSCRIPTION_PLANS, type SubscriptionPlan } from "./stripe";
+import { getOrCreateStripeCustomer } from "./stripe-webhook";
 
 export function json(data: unknown, status = 200) {
   return Response.json(data, { status });
@@ -103,7 +44,7 @@ const INTEREST_CATEGORIES = [
   "Documentos", "Historia", "Ciencia", "Arte", "Infantil",
 ];
 
-const SUBSCRIPTION_PLANS = {
+const SUBSCRIPTION_PLANS_UI = {
   basic: { name: "Básica", price: 4.99, features: ["Acceso a noticias", "5 descargas offline/mes"] },
   premium: { name: "Premium", price: 9.99, features: ["Todo el catálogo", "Descargas ilimitadas", "Sin anuncios"] },
   family: { name: "Familiar", price: 14.99, features: ["Hasta 5 perfiles", "Todo Premium", "Contenido infantil"] },
@@ -213,22 +154,113 @@ export async function handleApiRequest(req: Request, pathSegments: string[]) {
     }
 
     if (path.match(/^catalog\/[^/]+\/purchase$/) && method === "POST") {
+      return error("Use Stripe checkout: POST /api/stripe/checkout/purchase", 400);
+    }
+
+    // STRIPE CHECKOUT
+    if (path === "stripe/checkout/purchase" && method === "POST") {
       const auth = await requireAuth(req, ["user"]);
       if (auth.err) return auth.err;
-      const id = pathSegments[1];
-      const { data: content } = await db.from("content_items").select("*").eq("id", id).eq("status", "published").single();
-      if (!content) return error("Content not found", 404);
+      const body = await parseBody<{ contentId: string }>(req);
+      const { data: content } = await db.from("content_items").select("*").eq("id", body.contentId).eq("status", "published").single();
+      if (!content || content.price == null) return error("Content not found or not for sale", 404);
+
+      const stripe = getStripe();
+      const customerId = await getOrCreateStripeCustomer(db, auth.user!.id, auth.user!.email, stripe);
+
       const { data: payment } = await db.from("payments").insert({
         user_id: auth.user!.id,
         type: "purchase",
         description: content.title,
-        amount: content.price ?? 0,
-        status: "completed",
-        content_id: id,
+        amount: content.price,
+        status: "pending",
+        content_id: body.contentId,
       }).select().single();
-      await db.from("user_library").upsert({ user_id: auth.user!.id, content_id: id, progress: 0 }, { onConflict: "user_id,content_id" });
-      await db.from("content_items").update({ purchases: (content.purchases ?? 0) + 1 }).eq("id", id);
-      return json({ payment, success: true });
+
+      const baseUrl = getAppUrl();
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        mode: "payment",
+        payment_method_types: ["card"],
+        line_items: [{
+          price_data: {
+            currency: "eur",
+            unit_amount: Math.round(Number(content.price) * 100),
+            product_data: { name: content.title, description: content.description ?? undefined },
+          },
+          quantity: 1,
+        }],
+        success_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/content/${body.contentId}?canceled=1`,
+        metadata: {
+          type: "purchase",
+          userId: auth.user!.id,
+          contentId: body.contentId,
+          paymentId: payment!.id,
+        },
+      });
+
+      await db.from("payments").update({ stripe_checkout_session_id: session.id }).eq("id", payment!.id);
+      return json({ url: session.url, sessionId: session.id });
+    }
+
+    if (path === "stripe/checkout/subscription" && method === "POST") {
+      const auth = await requireAuth(req, ["user"]);
+      if (auth.err) return auth.err;
+      const body = await parseBody<{ plan: SubscriptionPlan }>(req);
+      const planInfo = SUBSCRIPTION_PLANS[body.plan];
+      if (!planInfo) return error("Invalid plan");
+
+      const stripe = getStripe();
+      const customerId = await getOrCreateStripeCustomer(db, auth.user!.id, auth.user!.email, stripe);
+
+      const { data: payment } = await db.from("payments").insert({
+        user_id: auth.user!.id,
+        type: "subscription",
+        description: `Suscripción ${planInfo.name} — Mensual`,
+        amount: planInfo.price,
+        status: "pending",
+      }).select().single();
+
+      const baseUrl = getAppUrl();
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        mode: "subscription",
+        payment_method_types: ["card"],
+        line_items: [{
+          price_data: {
+            currency: "eur",
+            unit_amount: Math.round(planInfo.price * 100),
+            recurring: { interval: "month" },
+            product_data: { name: planInfo.name },
+          },
+          quantity: 1,
+        }],
+        success_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/subscription?canceled=1`,
+        metadata: {
+          type: "subscription",
+          userId: auth.user!.id,
+          plan: body.plan,
+          paymentId: payment!.id,
+        },
+      });
+
+      await db.from("payments").update({ stripe_checkout_session_id: session.id }).eq("id", payment!.id);
+      return json({ url: session.url, sessionId: session.id });
+    }
+
+    if (path.match(/^stripe\/session\/[^/]+$/) && method === "GET") {
+      const auth = await requireAuth(req, ["user"]);
+      if (auth.err) return auth.err;
+      const sessionId = pathSegments[2];
+      const session = await getStripe().checkout.sessions.retrieve(sessionId);
+      if (session.metadata?.userId !== auth.user!.id) return error("Forbidden", 403);
+      return json({
+        status: session.status,
+        paymentStatus: session.payment_status,
+        type: session.metadata?.type,
+      });
     }
 
     // ONBOARDING
@@ -254,7 +286,7 @@ export async function handleApiRequest(req: Request, pathSegments: string[]) {
     }
 
     // SUBSCRIPTIONS
-    if (path === "subscriptions/plans" && method === "GET") return json(SUBSCRIPTION_PLANS);
+    if (path === "subscriptions/plans" && method === "GET") return json(SUBSCRIPTION_PLANS_UI);
 
     if (path === "subscriptions/me" && method === "GET") {
       const auth = await requireAuth(req, ["user"]);
@@ -264,29 +296,7 @@ export async function handleApiRequest(req: Request, pathSegments: string[]) {
     }
 
     if (path === "subscriptions/subscribe" && method === "POST") {
-      const auth = await requireAuth(req, ["user"]);
-      if (auth.err) return auth.err;
-      const body = await parseBody<{ plan: keyof typeof SUBSCRIPTION_PLANS }>(req);
-      const planInfo = SUBSCRIPTION_PLANS[body.plan];
-      if (!planInfo) return error("Invalid plan");
-      await db.from("subscriptions").update({ status: "cancelled" }).eq("user_id", auth.user!.id).eq("status", "active");
-      const expiresAt = new Date();
-      expiresAt.setMonth(expiresAt.getMonth() + 1);
-      const { data: sub } = await db.from("subscriptions").insert({
-        user_id: auth.user!.id,
-        plan: body.plan,
-        status: "active",
-        price: planInfo.price,
-        expires_at: expiresAt.toISOString(),
-      }).select().single();
-      await db.from("payments").insert({
-        user_id: auth.user!.id,
-        type: "subscription",
-        description: `Suscripción ${planInfo.name} — Mensual`,
-        amount: planInfo.price,
-        status: "completed",
-      });
-      return json(sub);
+      return error("Use Stripe checkout: POST /api/stripe/checkout/subscription", 400);
     }
 
     // LIBRARY

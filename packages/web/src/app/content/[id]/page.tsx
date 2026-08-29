@@ -27,10 +27,10 @@ export default function ContentDetailPage() {
     const token = getToken();
     if (!token || !id) return;
     try {
-      await api.catalog.purchase(id, token);
-      toast.success("Compra realizada");
+      const { url } = await api.stripe.checkoutPurchase(id, token);
+      if (url) window.location.href = url;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Error");
+      toast.error(err instanceof Error ? err.message : "Error al iniciar pago");
     }
   };
 

@@ -52,8 +52,21 @@ export const api = {
       return request<ContentItem[]>(`/catalog${q ? `?${q}` : ""}`);
     },
     get: (id: string) => request<ContentItem>(`/catalog/${id}`),
-    purchase: (id: string, token: string) =>
-      request(`/catalog/${id}/purchase`, { method: "POST" }, token),
+  },
+
+  stripe: {
+    checkoutPurchase: (contentId: string, token: string) =>
+      request<{ url: string; sessionId: string }>("/stripe/checkout/purchase", {
+        method: "POST",
+        body: JSON.stringify({ contentId }),
+      }, token),
+    checkoutSubscription: (plan: string, token: string) =>
+      request<{ url: string; sessionId: string }>("/stripe/checkout/subscription", {
+        method: "POST",
+        body: JSON.stringify({ plan }),
+      }, token),
+    getSession: (sessionId: string, token: string) =>
+      request<{ status: string; paymentStatus: string; type: string }>(`/stripe/session/${sessionId}`, {}, token),
   },
 
   library: {
@@ -82,8 +95,6 @@ export const api = {
   subscriptions: {
     plans: () => request<Record<string, { name: string; price: number; features: string[] }>>("/subscriptions/plans"),
     me: (token: string) => request<Subscription | null>("/subscriptions/me", {}, token),
-    subscribe: (plan: string, token: string) =>
-      request<Subscription>("/subscriptions/subscribe", { method: "POST", body: JSON.stringify({ plan }) }, token),
   },
 
   onboarding: {
