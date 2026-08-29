@@ -8,18 +8,14 @@ import {
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { UserLayout } from "@/components/layout/UserLayout";
+import { ActivityChart } from "@/components/shared/ActivityChart";
+import { AvatarDropzone } from "@/components/shared/AvatarDropzone";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { UserAvatar } from "@/components/shared/UserAvatar";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
 import type { UserProfile } from "@/lib/types";
+import { PLAN_LABELS } from "@/lib/subscription-plans";
 import { cn, formatCurrency } from "@/lib/utils";
-
-const PLAN_LABELS: Record<string, string> = {
-  basic: "Básica",
-  premium: "Premium",
-  family: "Familiar",
-};
 
 export default function ProfilePage() {
   const { user, getToken, updateUser } = useAuthStore();
@@ -31,6 +27,7 @@ export default function ProfilePage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [editingInterests, setEditingInterests] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const loadProfile = async () => {
     const token = getToken();
@@ -64,7 +61,7 @@ export default function ProfilePage() {
     if (!token) return;
     setSaving(true);
     try {
-      const updated = await api.profile.update({ fullName, avatarUrl }, token);
+      const updated = await api.profile.update({ fullName }, token);
       updateUser({ fullName: updated.full_name, avatarUrl: updated.avatar_url });
       setProfile((prev) =>
         prev
@@ -77,6 +74,23 @@ export default function ProfilePage() {
       toast.error(err instanceof Error ? err.message : "Error al guardar");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const uploadAvatar = async (file: File) => {
+    const token = getToken();
+    if (!token) return;
+    setUploadingAvatar(true);
+    try {
+      const { avatar_url } = await api.profile.uploadAvatar(file, token);
+      setAvatarUrl(avatar_url);
+      updateUser({ avatarUrl: avatar_url });
+      setProfile((prev) => (prev ? { ...prev, avatar_url } : prev));
+      toast.success("Avatar actualizado");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al subir la imagen");
+    } finally {
+      setUploadingAvatar(false);
     }
   };
 
@@ -129,11 +143,12 @@ export default function ProfilePage() {
           <div className="card lg:col-span-2">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
               <div className="flex flex-col items-center gap-3 sm:items-start">
-                <UserAvatar
+                <AvatarDropzone
                   name={editing ? fullName : profile.full_name}
                   email={profile.email}
-                  avatarUrl={editing ? avatarUrl || null : profile.avatar_url}
-                  size="xl"
+                  avatarUrl={avatarUrl || profile.avatar_url}
+                  uploading={uploadingAvatar}
+                  onFileSelect={uploadAvatar}
                 />
                 {!editing && (
                   <button onClick={startEdit} className="btn-ghost flex items-center gap-2 text-sm">
@@ -155,19 +170,6 @@ export default function ProfilePage() {
                         className="input w-full"
                         placeholder="Tu nombre"
                       />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-sm font-medium">URL del avatar</label>
-                      <input
-                        type="url"
-                        value={avatarUrl}
-                        onChange={(e) => setAvatarUrl(e.target.value)}
-                        className="input w-full"
-                        placeholder="https://..."
-                      />
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Pega una URL de imagen. Si la dejas vacía, se mostrarán tus iniciales.
-                      </p>
                     </div>
                     <div className="flex gap-2">
                       <button onClick={saveProfile} disabled={saving} className="btn-primary flex items-center gap-2">
@@ -201,7 +203,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Stats */}
+          {/* Stats & activity chart */}
           <div className="card space-y-4">
             <h3 className="font-semibold">Actividad</h3>
             <div className="grid grid-cols-2 gap-3">
@@ -323,6 +325,19 @@ export default function ProfilePage() {
               </p>
             )}
           </div>
+
+          {/* Activity history */}
+          {profile.activityHistory && (
+            <div className="card lg:col-span-3">
+              <h3 className="font-semibold">Tu actividad reciente</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Lecturas, reseñas y compras de los últimos 6 meses
+              </p>
+              <div className="mt-4">
+                <ActivityChart data={profile.activityHistory} />
+              </div>
+            </div>
+          )}
 
           {/* Recent payments */}
           {profile.recentPayments.length > 0 && (
