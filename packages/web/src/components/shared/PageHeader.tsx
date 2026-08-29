@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
-import { getContentRibbons } from "@/lib/content-ribbons";
+import { getDisplayRibbons } from "@/lib/content-ribbons";
+import type { ContentRibbonKind } from "@/lib/content-ribbons";
 import { ContentCover } from "./ContentCover";
 
 export function PageHeader({ title, description, children }: {
@@ -36,6 +37,7 @@ export function ContentCard({
   item,
   href,
   ownedIds,
+  primaryRibbon,
 }: {
   item: {
     id: string;
@@ -50,10 +52,11 @@ export function ContentCard({
   };
   href: string;
   ownedIds?: Set<string>;
+  primaryRibbon?: ContentRibbonKind;
 }) {
   const label = item.genre ?? item.type;
   const priceLabel = item.price != null ? `${item.price.toFixed(2)} €` : "Gratis";
-  const ribbons = getContentRibbons(item, { contentId: item.id, ownedIds });
+  const ribbons = getDisplayRibbons(item, { contentId: item.id, ownedIds }, primaryRibbon);
 
   return (
     <a

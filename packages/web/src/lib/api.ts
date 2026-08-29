@@ -55,6 +55,7 @@ export const api = {
       return request<ContentItem[]>(`/catalog${q ? `?${q}` : ""}`);
     },
     categories: () => request<{ name: string; count: number }[]>("/catalog/categories"),
+    featured: () => request<{ new: ContentItem[]; recommended: ContentItem[] }>("/catalog/featured"),
     get: (id: string) => request<ContentItem>(`/catalog/${id}`),
   },
 
@@ -120,6 +121,20 @@ export const api = {
         { method: "PATCH", body: JSON.stringify(data) },
         token,
       ),
+    uploadAvatar: async (file: File, token: string) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`${API}/profile/avatar`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: res.statusText }));
+        throw new Error(err.message ?? `Error ${res.status}`);
+      }
+      return res.json() as Promise<{ avatar_url: string }>;
+    },
   },
 
   dashboard: {

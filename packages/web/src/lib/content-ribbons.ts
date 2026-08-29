@@ -1,4 +1,4 @@
-export type ContentRibbonKind = "new" | "free" | "owned" | "offline" | "popular";
+export type ContentRibbonKind = "new" | "free" | "owned" | "offline" | "popular" | "recommended";
 
 export interface RibbonSource {
   price?: number | null;
@@ -55,6 +55,57 @@ export function getContentRibbons(
   return ribbons.slice(0, 2);
 }
 
+export function getDisplayRibbons(
+  item: RibbonSource,
+  context: RibbonContext = {},
+  primaryRibbon?: ContentRibbonKind,
+): ContentRibbonKind[] {
+  const auto = getContentRibbons(item, context);
+  if (!primaryRibbon) return auto;
+  const secondary = auto.filter((ribbon) => ribbon !== primaryRibbon)[0];
+  return secondary ? [primaryRibbon, secondary] : [primaryRibbon];
+}
+
+export interface FeaturedCatalogItem extends RibbonSource {
+  id: string;
+  title: string;
+  type: string;
+  genre?: string | null;
+  cover_url?: string;
+  author?: string;
+  impressions?: number;
+}
+
+const FEATURED_NEW_LIMIT = 8;
+const FEATURED_RECOMMENDED_LIMIT = 8;
+
+export function selectNewBooks<T extends FeaturedCatalogItem>(items: T[], limit = FEATURED_NEW_LIMIT): T[] {
+  const sorted = [...items].sort((a, b) => {
+    const aTime = a.published_at ? new Date(a.published_at).getTime() : 0;
+    const bTime = b.published_at ? new Date(b.published_at).getTime() : 0;
+    return bTime - aTime;
+  });
+
+  const recent = sorted.filter((item) => isNewContent(item.published_at));
+  if (recent.length >= Math.min(4, limit)) return recent.slice(0, limit);
+  return sorted.slice(0, limit);
+}
+
+export function selectRecommendedBooks<T extends FeaturedCatalogItem>(
+  items: T[],
+  excludeIds: Set<string> = new Set(),
+  limit = FEATURED_RECOMMENDED_LIMIT,
+): T[] {
+  return [...items]
+    .filter((item) => !excludeIds.has(item.id))
+    .sort((a, b) => {
+      const purchaseDiff = (b.purchases ?? 0) - (a.purchases ?? 0);
+      if (purchaseDiff !== 0) return purchaseDiff;
+      return (b.impressions ?? 0) - (a.impressions ?? 0);
+    })
+    .slice(0, limit);
+}
+
 export const RIBBON_META: Record<
   ContentRibbonKind,
   { label: string; shortLabel: string; src: string; alt: string }
@@ -88,5 +139,11 @@ export const RIBBON_META: Record<
     shortLabel: "Top",
     src: "/ribbons/ribbon-popular.svg",
     alt: "Contenido popular",
+  },
+  recommended: {
+    label: "Recomendado",
+    shortLabel: "Recom.",
+    src: "/ribbons/ribbon-recommended.svg",
+    alt: "Contenido recomendado",
   },
 };

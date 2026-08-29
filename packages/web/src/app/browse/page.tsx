@@ -5,6 +5,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { UserLayout } from "@/components/layout/UserLayout";
 import { ContentCard, PageHeader } from "@/components/shared/PageHeader";
 import { ContentListRow } from "@/components/shared/ContentListRow";
+import { FeaturedBooksSection } from "@/components/shared/FeaturedBooksSection";
 import { ViewModeToggle, type ViewMode } from "@/components/shared/ViewModeToggle";
 import { api } from "@/lib/api";
 import { getContentRibbons } from "@/lib/content-ribbons";
@@ -48,6 +49,7 @@ export default function BrowsePage() {
   }, [search, type, genre]);
 
   const totalCount = categories.reduce((sum, c) => sum + c.count, 0);
+  const filtersActive = Boolean(search || type || genre);
 
   return (
     <ProtectedRoute roles={["user"]}>
@@ -58,6 +60,8 @@ export default function BrowsePage() {
         >
           <ViewModeToggle value={viewMode} onChange={setViewMode} />
         </PageHeader>
+
+        <FeaturedBooksSection ownedIds={ownedIds} hidden={filtersActive} />
 
         {categories.length > 0 && (
           <div className="mb-6">

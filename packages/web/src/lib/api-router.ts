@@ -176,6 +176,21 @@ export async function handleApiRequest(req: Request, pathSegments: string[]) {
       return json(categories);
     }
 
+    if (path === "catalog/featured" && method === "GET") {
+      const { selectNewBooks, selectRecommendedBooks } = await import("@/lib/content-ribbons");
+      const { data, error: qErr } = await db
+        .from("content_items")
+        .select("*, editorials(name)")
+        .eq("status", "published")
+        .order("published_at", { ascending: false })
+        .limit(300);
+      if (qErr) return error(qErr.message, 500);
+      const items = data ?? [];
+      const newBooks = selectNewBooks(items);
+      const recommended = selectRecommendedBooks(items, new Set(newBooks.map((item) => item.id)));
+      return json({ new: newBooks, recommended });
+    }
+
     if (path === "catalog" && method === "GET") {
       const url = new URL(req.url);
       let query = db.from("content_items").select("*, editorials(name)").eq("status", "published");
