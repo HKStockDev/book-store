@@ -8,12 +8,14 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/auth-store";
 import { api } from "@/lib/api";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 
 const NAV = [
   { href: "/browse", label: "Explorar", icon: Search },
   { href: "/library", label: "Mi biblioteca", icon: Library },
   { href: "/lists", label: "Listas", icon: List },
   { href: "/subscription", label: "Suscripción", icon: CreditCard },
+  { href: "/profile", label: "Perfil", icon: User },
 ];
 
 export function UserLayout({ children }: { children: React.ReactNode }) {
@@ -52,8 +54,22 @@ export function UserLayout({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <span className="hidden text-sm text-muted-foreground sm:block">{user?.fullName}</span>
-            <button onClick={handleLogout} className="btn-ghost p-2">
+            <Link
+              href="/profile"
+              className="flex items-center gap-2 rounded-lg px-2 py-1 transition-colors hover:bg-accent"
+              title="Mi perfil"
+            >
+              <UserAvatar
+                name={user?.fullName}
+                email={user?.email}
+                avatarUrl={user?.avatarUrl}
+                size="sm"
+              />
+              <span className="hidden text-sm text-muted-foreground sm:block">
+                {user?.fullName ?? user?.email}
+              </span>
+            </Link>
+            <button onClick={handleLogout} className="btn-ghost p-2" title="Cerrar sesión">
               <LogOut className="h-4 w-4" />
             </button>
           </div>

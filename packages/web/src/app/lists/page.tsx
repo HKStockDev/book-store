@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { UserLayout } from "@/components/layout/UserLayout";
+import { ContentCover } from "@/components/shared/ContentCover";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
@@ -50,7 +51,15 @@ export default function ListsPage() {
               <p className="text-sm text-muted-foreground">{list.is_public ? "Pública" : "Privada"} · {list.list_items?.length ?? 0} elementos</p>
               <ul className="mt-3 space-y-1">
                 {list.list_items?.map((li) => (
-                  <li key={li.content_id} className="text-sm">{li.content_items?.title}</li>
+                  <li key={li.content_id} className="flex items-center gap-2 text-sm">
+                    <ContentCover
+                      coverUrl={li.content_items?.cover_url}
+                      title={li.content_items?.title ?? ""}
+                      className="w-8 rounded"
+                      aspectClass="aspect-[3/4]"
+                    />
+                    <span>{li.content_items?.title}</span>
+                  </li>
                 ))}
               </ul>
             </div>

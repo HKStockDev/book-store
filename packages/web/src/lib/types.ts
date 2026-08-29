@@ -7,6 +7,27 @@ export interface AuthUser {
   fullName: string | null;
   editorialId: string | null;
   accessToken: string;
+  avatarUrl?: string | null;
+}
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  role: UserRole;
+  status: string;
+  onboarding_completed: boolean;
+  created_at: string;
+  interests: string[];
+  subscription: Subscription | null;
+  stats: {
+    libraryCount: number;
+    listsCount: number;
+    reviewsCount: number;
+    purchasesCount: number;
+  };
+  recentPayments: Payment[];
 }
 
 export interface ContentItem {

@@ -57,7 +57,7 @@ export class ListsController {
       .getAdminClient()
       .from("list_items")
       .upsert({ list_id: listId, content_id: contentId }, { onConflict: "list_id,content_id" })
-      .select("*, content_items(title, type)")
+      .select("*, content_items(title, type, cover_url)")
       .single();
 
     if (error) throw new Error(error.message);

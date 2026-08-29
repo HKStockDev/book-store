@@ -32,7 +32,7 @@ async function main() {
   } catch (err) {
     const msg = err.message ?? String(err);
     if (msg.includes("already exists")) {
-      console.log("Schema partially exists — continuing (safe to re-run individual statements manually).\n");
+      console.log("Schema partially exists - continuing (safe to re-run individual statements manually).\n");
     } else {
       throw err;
     }

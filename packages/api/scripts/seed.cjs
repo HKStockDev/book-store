@@ -1,5 +1,5 @@
 /**
- * IWWEI demo seed — reset demo data and create full platform sample.
+ * IWWEI demo seed - reset demo data and create full platform sample.
  */
 require("dotenv").config({ path: require("node:path").join(__dirname, "../.env") });
 const { createClient } = require("@supabase/supabase-js");
@@ -159,7 +159,7 @@ async function main() {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  console.log("\nIWWEI — seeding demo data\n");
+  console.log("\nIWWEI - seeding demo data\n");
   console.log("1. Clearing all data...");
   await clearAllData(admin);
 
@@ -195,7 +195,7 @@ async function main() {
   console.log("3. Inserting content...");
   const contentRows = [
     {
-      title: "El Quijote — Edición Digital",
+      title: "El Quijote - Edición Digital",
       description: "La obra cumbre de la literatura española en formato digital interactivo.",
       type: "book",
       editorial_id: planetaId,
@@ -208,7 +208,7 @@ async function main() {
       published_at: "2023-03-01T00:00:00Z",
     },
     {
-      title: "Historia de España — Tomo III",
+      title: "Historia de España - Tomo III",
       description: "Documento académico con visor Apryse integrado.",
       type: "document",
       editorial_id: planetaId,
@@ -222,7 +222,7 @@ async function main() {
       published_at: "2025-06-01T00:00:00Z",
     },
     {
-      title: "Mortadelo y Filemón — Colección Completa",
+      title: "Mortadelo y Filemón - Colección Completa",
       description: "Todos los álbumes clásicos en formato digital vía Taddy.",
       type: "comic",
       editorial_id: normaId,
@@ -236,7 +236,7 @@ async function main() {
       published_at: "2024-01-15T00:00:00Z",
     },
     {
-      title: "Noticias del Día — Agregador",
+      title: "Noticias del Día - Agregador",
       description: "Agregación de noticias en tiempo real vía World News API.",
       type: "news",
       editorial_id: planetaId,
@@ -493,10 +493,10 @@ async function main() {
 
   console.log("9. Inserting payments...");
   await admin.from("payments").insert([
-    { user_id: mariaId, type: "subscription", description: "Suscripción Premium — Mensual", amount: 9.99, status: "completed", created_at: "2026-08-01T00:00:00Z" },
-    { user_id: carlosId, type: "subscription", description: "Suscripción Básica — Mensual", amount: 4.99, status: "completed", created_at: "2026-08-01T00:00:00Z" },
-    { user_id: mariaId, type: "purchase", description: "El Quijote — Edición Digital", amount: 9.99, status: "completed", content_id: quijoteId, created_at: "2026-08-15T00:00:00Z" },
-    { user_id: mariaId, type: "purchase", description: "Historia de España — Tomo III", amount: 14.99, status: "pending", content_id: historiaId, created_at: "2026-08-28T00:00:00Z" },
+    { user_id: mariaId, type: "subscription", description: "Suscripción Premium - Mensual", amount: 9.99, status: "completed", created_at: "2026-08-01T00:00:00Z" },
+    { user_id: carlosId, type: "subscription", description: "Suscripción Básica - Mensual", amount: 4.99, status: "completed", created_at: "2026-08-01T00:00:00Z" },
+    { user_id: mariaId, type: "purchase", description: "El Quijote - Edición Digital", amount: 9.99, status: "completed", content_id: quijoteId, created_at: "2026-08-15T00:00:00Z" },
+    { user_id: mariaId, type: "purchase", description: "Historia de España - Tomo III", amount: 14.99, status: "pending", content_id: historiaId, created_at: "2026-08-28T00:00:00Z" },
     { user_id: mariaId, type: "purchase", description: "La Sombra del Viento", amount: 11.99, status: "completed", content_id: sombraId, created_at: "2026-08-10T00:00:00Z" },
     { user_id: carlosId, type: "purchase", description: "1984", amount: 8.49, status: "completed", content_id: orwellId, created_at: "2026-08-18T00:00:00Z" },
     { user_id: mariaId, type: "purchase", description: "El Principito", amount: 5.99, status: "completed", content_id: principitoId, created_at: "2026-07-22T00:00:00Z" },

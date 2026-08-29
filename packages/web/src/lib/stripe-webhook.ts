@@ -103,7 +103,7 @@ export async function fulfillSubscription(
     await db.from("payments").insert({
       user_id: userId,
       type: "subscription",
-      description: `Suscripción ${planInfo.name} — Mensual`,
+      description: `Suscripción ${planInfo.name} - Mensual`,
       amount: planInfo.price,
       status: "completed",
       stripe_checkout_session_id: session.id,

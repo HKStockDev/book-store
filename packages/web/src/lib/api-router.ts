@@ -217,7 +217,7 @@ export async function handleApiRequest(req: Request, pathSegments: string[]) {
       const { data: payment } = await db.from("payments").insert({
         user_id: auth.user!.id,
         type: "subscription",
-        description: `Suscripción ${planInfo.name} — Mensual`,
+        description: `Suscripción ${planInfo.name} - Mensual`,
         amount: planInfo.price,
         status: "pending",
       }).select().single();
@@ -297,6 +297,79 @@ export async function handleApiRequest(req: Request, pathSegments: string[]) {
 
     if (path === "subscriptions/subscribe" && method === "POST") {
       return error("Use Stripe checkout: POST /api/stripe/checkout/subscription", 400);
+    }
+
+    // PROFILE
+    if (path === "profile" && method === "GET") {
+      const auth = await requireAuth(req, ["user"]);
+      if (auth.err) return auth.err;
+      const userId = auth.user!.id;
+
+      const [
+        { data: profile },
+        { data: interests },
+        { data: subscription },
+        { count: libraryCount },
+        { count: listsCount },
+        { count: reviewsCount },
+        { count: purchasesCount },
+        { data: recentPayments },
+      ] = await Promise.all([
+        db.from("profiles").select("*").eq("id", userId).single(),
+        db.from("user_interests").select("category").eq("user_id", userId),
+        db.from("subscriptions").select("*").eq("user_id", userId).eq("status", "active").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+        db.from("user_library").select("id", { count: "exact", head: true }).eq("user_id", userId),
+        db.from("user_lists").select("id", { count: "exact", head: true }).eq("user_id", userId),
+        db.from("reviews").select("id", { count: "exact", head: true }).eq("user_id", userId),
+        db.from("payments").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("status", "completed"),
+        db.from("payments").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(5),
+      ]);
+
+      if (!profile) return error("Profile not found", 404);
+
+      return json({
+        id: profile.id,
+        email: profile.email,
+        full_name: profile.full_name,
+        avatar_url: profile.avatar_url,
+        role: profile.role,
+        status: profile.status,
+        onboarding_completed: profile.onboarding_completed,
+        created_at: profile.created_at,
+        interests: (interests ?? []).map((i) => i.category),
+        subscription: subscription ?? null,
+        stats: {
+          libraryCount: libraryCount ?? 0,
+          listsCount: listsCount ?? 0,
+          reviewsCount: reviewsCount ?? 0,
+          purchasesCount: purchasesCount ?? 0,
+        },
+        recentPayments: recentPayments ?? [],
+      });
+    }
+
+    if (path === "profile" && method === "PATCH") {
+      const auth = await requireAuth(req, ["user"]);
+      if (auth.err) return auth.err;
+      const body = await parseBody<{ fullName?: string; avatarUrl?: string }>(req);
+      const updates: Record<string, string | null> = {};
+      if (body.fullName !== undefined) updates.full_name = body.fullName.trim() || null;
+      if (body.avatarUrl !== undefined) updates.avatar_url = body.avatarUrl.trim() || null;
+      if (!Object.keys(updates).length) return error("No fields to update", 400);
+
+      const { data, error: updateError } = await db
+        .from("profiles")
+        .update(updates)
+        .eq("id", auth.user!.id)
+        .select("*")
+        .single();
+      if (updateError) return error(updateError.message, 400);
+      return json({
+        id: data.id,
+        email: data.email,
+        full_name: data.full_name,
+        avatar_url: data.avatar_url,
+      });
     }
 
     // LIBRARY
@@ -448,8 +521,30 @@ export async function handleApiRequest(req: Request, pathSegments: string[]) {
         editorial_id: editorialId,
         price: body.price ?? null,
         integration: body.integration ?? null,
+        cover_url: body.cover_url ?? null,
+        author: body.author ?? null,
+        description: body.description ?? null,
         status: auth.user!.role === "publisher" ? "review" : "draft",
       }).select().single();
+      return json(data);
+    }
+
+    if (path.match(/^content\/[^/]+$/) && method === "PATCH") {
+      const auth = await requireAuth(req, ["admin", "publisher"]);
+      if (auth.err) return auth.err;
+      const body = await parseBody<Record<string, unknown>>(req);
+      const updates: Record<string, unknown> = {};
+      if (body.title !== undefined) updates.title = body.title;
+      if (body.cover_url !== undefined) updates.cover_url = body.cover_url;
+      if (body.author !== undefined) updates.author = body.author;
+      if (body.description !== undefined) updates.description = body.description;
+      if (body.price !== undefined) updates.price = body.price;
+      if (body.integration !== undefined) updates.integration = body.integration;
+      let query = db.from("content_items").update(updates).eq("id", pathSegments[1]);
+      if (auth.user!.role === "publisher" && auth.user!.editorialId) {
+        query = query.eq("editorial_id", auth.user!.editorialId);
+      }
+      const { data } = await query.select().single();
       return json(data);
     }
 

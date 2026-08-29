@@ -32,6 +32,7 @@ export type AuthUser = {
   fullName: string | null;
   editorialId: string | null;
   accessToken: string;
+  avatarUrl?: string | null;
 };
 
 export async function getUserFromToken(token: string): Promise<AuthUser | null> {
@@ -53,6 +54,7 @@ export async function getUserFromToken(token: string): Promise<AuthUser | null> 
     fullName: profile.full_name,
     editorialId: profile.editorial_id,
     accessToken: token,
+    avatarUrl: profile.avatar_url ?? null,
   };
 }
 
@@ -64,5 +66,6 @@ export function toAuthUser(profile: Record<string, unknown>, accessToken: string
     fullName: profile.full_name as string | null,
     editorialId: profile.editorial_id as string | null,
     accessToken,
+    avatarUrl: (profile.avatar_url as string | null) ?? null,
   };
 }

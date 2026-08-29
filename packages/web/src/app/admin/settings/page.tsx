@@ -28,9 +28,9 @@ export default function AdminSettingsPage() {
           <div className="card">
             <h3 className="mb-4 font-semibold">Integraciones</h3>
             <ul className="space-y-2 text-sm">
-              <li>Apryse (visor documental): {(settings?.integrations as { apryse?: { enabled: boolean } })?.apryse?.enabled ? "✓ Configurado" : "—"}</li>
-              <li>Taddy (cómics/podcasts): {(settings?.integrations as { taddy?: { enabled: boolean } })?.taddy?.enabled ? "✓ Configurado" : "—"}</li>
-              <li>World News API: {(settings?.integrations as { worldNews?: { enabled: boolean } })?.worldNews?.enabled ? "✓ Configurado" : "—"}</li>
+              <li>Apryse (visor documental): {(settings?.integrations as { apryse?: { enabled: boolean } })?.apryse?.enabled ? "✓ Configurado" : "-"}</li>
+              <li>Taddy (cómics/podcasts): {(settings?.integrations as { taddy?: { enabled: boolean } })?.taddy?.enabled ? "✓ Configurado" : "-"}</li>
+              <li>World News API: {(settings?.integrations as { worldNews?: { enabled: boolean } })?.worldNews?.enabled ? "✓ Configurado" : "-"}</li>
             </ul>
           </div>
           <div className="card md:col-span-2">

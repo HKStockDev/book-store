@@ -68,14 +68,14 @@ export class DashboardController {
           .filter((s) => s.status === "pending")
           .map((s) => ({
             id: s.id,
-            editorialName: (s.editorials as { name?: string } | null)?.name ?? "—",
+            editorialName: (s.editorials as { name?: string } | null)?.name ?? "-",
             period: s.period,
             amount: Number(s.amount),
           })),
         activePromotionRows: (promotions.data ?? []).map((p) => ({
           id: p.id,
           name: p.name,
-          editorialName: (p.editorials as { name?: string } | null)?.name ?? "—",
+          editorialName: (p.editorials as { name?: string } | null)?.name ?? "-",
           impressions: Number(p.impressions),
           clicks: Number(p.clicks),
         })),

@@ -38,6 +38,9 @@ export class ContentController {
       editorialId?: string;
       price?: number;
       integration?: string;
+      cover_url?: string;
+      author?: string;
+      description?: string;
     },
   ) {
     const editorialId =
@@ -56,11 +59,52 @@ export class ContentController {
         editorial_id: editorialId,
         price: body.price ?? null,
         integration: body.integration ?? null,
+        cover_url: body.cover_url ?? null,
+        author: body.author ?? null,
+        description: body.description ?? null,
         status: user.role === "publisher" ? "review" : "draft",
       })
       .select()
       .single();
 
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  @Patch(":id")
+  @Roles("admin", "publisher")
+  async update(
+    @CurrentUser() user: AuthUser,
+    @Param("id") id: string,
+    @Body()
+    body: {
+      title?: string;
+      cover_url?: string;
+      author?: string;
+      description?: string;
+      price?: number;
+      integration?: string;
+    },
+  ) {
+    const updates: Record<string, unknown> = {};
+    if (body.title !== undefined) updates.title = body.title;
+    if (body.cover_url !== undefined) updates.cover_url = body.cover_url;
+    if (body.author !== undefined) updates.author = body.author;
+    if (body.description !== undefined) updates.description = body.description;
+    if (body.price !== undefined) updates.price = body.price;
+    if (body.integration !== undefined) updates.integration = body.integration;
+
+    let query = this.supabase
+      .getAdminClient()
+      .from("content_items")
+      .update(updates)
+      .eq("id", id);
+
+    if (user.role === "publisher" && user.editorialId) {
+      query = query.eq("editorial_id", user.editorialId);
+    }
+
+    const { data, error } = await query.select().single();
     if (error) throw new Error(error.message);
     return data;
   }

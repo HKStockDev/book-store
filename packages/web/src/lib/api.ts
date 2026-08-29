@@ -11,6 +11,7 @@ import type {
   Review,
   Subscription,
   UserList,
+  UserProfile,
 } from "./types";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "/api";
@@ -104,6 +105,16 @@ export const api = {
       request("/onboarding/interests", { method: "POST", body: JSON.stringify({ categories }) }, token),
   },
 
+  profile: {
+    get: (token: string) => request<UserProfile>("/profile", {}, token),
+    update: (data: { fullName?: string; avatarUrl?: string }, token: string) =>
+      request<{ id: string; email: string; full_name: string | null; avatar_url: string | null }>(
+        "/profile",
+        { method: "PATCH", body: JSON.stringify(data) },
+        token,
+      ),
+  },
+
   dashboard: {
     stats: (token: string) => request<DashboardStats>("/dashboard/stats", {}, token),
   },
@@ -126,8 +137,26 @@ export const api = {
 
   content: {
     list: (token: string) => request<ContentItem[]>("/content", {}, token),
-    create: (data: Record<string, unknown>, token: string) =>
+    create: (data: {
+      title: string;
+      type: string;
+      price?: number;
+      integration?: string;
+      cover_url?: string;
+      author?: string;
+      description?: string;
+      editorialId?: string;
+    }, token: string) =>
       request<ContentItem>("/content", { method: "POST", body: JSON.stringify(data) }, token),
+    update: (id: string, data: {
+      title?: string;
+      cover_url?: string;
+      author?: string;
+      description?: string;
+      price?: number;
+      integration?: string;
+    }, token: string) =>
+      request<ContentItem>(`/content/${id}`, { method: "PATCH", body: JSON.stringify(data) }, token),
     updateStatus: (id: string, status: string, token: string) =>
       request(`/content/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }, token),
   },

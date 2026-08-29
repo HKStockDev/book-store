@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { UserLayout } from "@/components/layout/UserLayout";
 import { Badge } from "@/components/shared/PageHeader";
+import { ContentCover } from "@/components/shared/ContentCover";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
 import type { ContentItem } from "@/lib/types";
@@ -55,12 +56,7 @@ export default function ContentDetailPage() {
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-1">
             <div className="card overflow-hidden p-0">
-              {item.cover_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={item.cover_url} alt={item.title} className="w-full" />
-              ) : (
-                <div className="flex aspect-[3/4] items-center justify-center bg-secondary">Sin portada</div>
-              )}
+              <ContentCover coverUrl={item.cover_url} title={item.title} />
             </div>
           </div>
           <div className="lg:col-span-2 space-y-6">

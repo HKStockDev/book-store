@@ -1,4 +1,4 @@
--- IWWEI Platform — Supabase schema (full reset + create)
+-- IWWEI Platform - Supabase schema (full reset + create)
 
 -- Drop existing objects
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;

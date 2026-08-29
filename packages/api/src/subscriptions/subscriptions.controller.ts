@@ -76,7 +76,7 @@ export class SubscriptionsController {
     await this.supabase.getAdminClient().from("payments").insert({
       user_id: user.id,
       type: "subscription",
-      description: `Suscripción ${planInfo.name} — Mensual`,
+      description: `Suscripción ${planInfo.name} - Mensual`,
       amount: planInfo.price,
       status: "completed",
     });

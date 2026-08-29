@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, BookOpen } from "lucide-react";
+import { Download } from "lucide-react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { UserLayout } from "@/components/layout/UserLayout";
+import { ContentCover } from "@/components/shared/ContentCover";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth-store";
@@ -28,7 +29,7 @@ export default function LibraryPage() {
           <div className="space-y-4">
             {items.map((item) => (
               <div key={item.id} className="card flex items-center gap-4">
-                <BookOpen className="h-8 w-8 text-primary shrink-0" />
+                <ContentCover coverUrl={item.content_items.cover_url} title={item.content_items.title} className="w-16 rounded-md" />
                 <div className="flex-1">
                   <h3 className="font-semibold">{item.content_items.title}</h3>
                   <p className="text-sm text-muted-foreground">{item.content_items.editorials?.name}</p>

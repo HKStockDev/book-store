@@ -3,7 +3,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "IWWEI — Plataforma de contenidos digitales",
+  title: "IWWEI - Plataforma de contenidos digitales",
   description: "Libros, cómics, podcasts y noticias en un solo lugar",
 };
 

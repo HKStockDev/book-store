@@ -35,10 +35,13 @@ export interface Editorial {
 export interface ContentItem {
   id: string;
   title: string;
+  description?: string | null;
   type: string;
   editorial_id: string;
   status: string;
   price: number | null;
+  author?: string | null;
+  cover_url?: string | null;
   impressions: number;
   purchases: number;
   integration: string | null;

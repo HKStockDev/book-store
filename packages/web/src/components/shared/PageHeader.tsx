@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { ContentCover } from "./ContentCover";
 
 export function PageHeader({ title, description, children }: {
   title: string;
@@ -33,14 +34,7 @@ export function Badge({ children, className }: { children: React.ReactNode; clas
 export function ContentCard({ item, href }: { item: { id: string; title: string; type: string; price?: number | null; cover_url?: string; author?: string }; href: string }) {
   return (
     <a href={href} className="group card overflow-hidden p-0 transition-shadow hover:shadow-md">
-      <div className="aspect-[3/4] bg-secondary">
-        {item.cover_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.cover_url} alt={item.title} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full items-center justify-center text-muted-foreground">Sin portada</div>
-        )}
-      </div>
+      <ContentCover coverUrl={item.cover_url} title={item.title} />
       <div className="p-4">
         <p className="text-xs uppercase text-muted-foreground">{item.type}</p>
         <h3 className="mt-1 font-semibold group-hover:text-primary">{item.title}</h3>

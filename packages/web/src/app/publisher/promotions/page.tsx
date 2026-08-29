@@ -29,7 +29,7 @@ export default function PublisherPromotionsPage() {
                 <h3 className="font-semibold">{p.name}</h3>
                 <Badge className={STATUS_COLORS[p.status]}>{p.status}</Badge>
               </div>
-              <p className="text-sm text-muted-foreground">{p.start_date} — {p.end_date}</p>
+              <p className="text-sm text-muted-foreground">{p.start_date} - {p.end_date}</p>
               <div className="mt-4 grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
                 <div><span className="text-muted-foreground">Presupuesto</span><p>{formatCurrency(p.budget)}</p></div>
                 <div><span className="text-muted-foreground">Gastado</span><p>{formatCurrency(p.spent)}</p></div>
