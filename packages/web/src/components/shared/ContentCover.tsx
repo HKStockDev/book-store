@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getTypeFallback, resolveCoverUrl } from "@/lib/content-covers";
+import { getTypeFallback, resolveCoverFallback, resolveCoverUrl } from "@/lib/content-covers";
 import { cn } from "@/lib/utils";
 
 export function ContentCover({
@@ -21,16 +21,21 @@ export function ContentCover({
 }) {
   const resolved = resolveCoverUrl(coverUrl, title, type);
   const [src, setSrc] = useState(resolved);
-  const [failed, setFailed] = useState(false);
+  const [fallbackStep, setFallbackStep] = useState(0);
 
   useEffect(() => {
     setSrc(resolveCoverUrl(coverUrl, title, type));
-    setFailed(false);
+    setFallbackStep(0);
   }, [coverUrl, title, type]);
 
   const handleError = () => {
-    if (failed) return;
-    setFailed(true);
+    if (fallbackStep >= 2) return;
+    const nextStep = fallbackStep + 1;
+    setFallbackStep(nextStep);
+    if (nextStep === 1) {
+      setSrc(resolveCoverFallback(src, title, type));
+      return;
+    }
     setSrc(getTypeFallback(type, `${title}-fallback`));
   };
 

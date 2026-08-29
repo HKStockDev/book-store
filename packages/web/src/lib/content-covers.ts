@@ -1,48 +1,60 @@
-/** Curated cover URLs: Open Library for books, Unsplash for other media types. */
+/**
+ * Curated cover art served from /public/covers (committed to GitHub).
+ * Images sourced from Open Library (books/comics) and Unsplash (news).
+ */
 
-const BOOK_COVERS: [string, string][] = [
-  ["quijote", "https://covers.openlibrary.org/b/isbn/9788420412146-L.jpg"],
-  ["historia de espa", "https://images.unsplash.com/photo-1456513087680-9aaa5b645147?w=600&q=80&auto=format&fit=crop"],
-  ["mortadelo", "https://images.unsplash.com/photo-1612036782185-39b4a8d2d2a2?w=600&q=80&auto=format&fit=crop"],
-  ["noticias", "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&q=80&auto=format&fit=crop"],
-  ["crónica de la ciencia", "https://images.unsplash.com/photo-1478737276239-2f02a577ef88?w=600&q=80&auto=format&fit=crop"],
-  ["cien años", "https://covers.openlibrary.org/b/isbn/9788497592208-L.jpg"],
-  ["asterix", "https://images.unsplash.com/photo-1612178537253-bccd4370593f?w=600&q=80&auto=format&fit=crop"],
-  ["sombra del viento", "https://covers.openlibrary.org/b/isbn/9788408043646-L.jpg"],
-  ["1984", "https://covers.openlibrary.org/b/isbn/9788499890944-L.jpg"],
-  ["dune", "https://covers.openlibrary.org/b/isbn/9788497596816-L.jpg"],
-  ["rayuela", "https://covers.openlibrary.org/b/isbn/9788437617294-L.jpg"],
-  ["nombre de la rosa", "https://covers.openlibrary.org/b/isbn/9788432224778-L.jpg"],
-  ["aleph", "https://covers.openlibrary.org/b/isbn/9788499080955-L.jpg"],
-  ["pilares de la tierra", "https://covers.openlibrary.org/b/isbn/9788497593792-L.jpg"],
-  ["orgullo y prejuicio", "https://covers.openlibrary.org/b/isbn/9788491050770-L.jpg"],
-  ["casa de los espíritus", "https://covers.openlibrary.org/b/isbn/9788401354135-L.jpg"],
-  ["principito", "https://covers.openlibrary.org/b/isbn/9788498381491-L.jpg"],
+export const COVER_ASSETS: Record<string, string> = {
+  "quijote": "/covers/quijote.jpg",
+  "historia-espana": "/covers/historia-espana.jpg",
+  "mortadelo": "/covers/mortadelo.jpg",
+  "noticias": "/covers/noticias.jpg",
+  "cronica-ciencia": "/covers/cronica-ciencia.jpg",
+  "cien-anos": "/covers/cien-anos.jpg",
+  "asterix": "/covers/asterix.jpg",
+  "sombra-viento": "/covers/sombra-viento.jpg",
+  "1984": "/covers/1984.jpg",
+  "dune": "/covers/dune.jpg",
+  "rayuela": "/covers/rayuela.jpg",
+  "nombre-rosa": "/covers/nombre-rosa.jpg",
+  "aleph": "/covers/aleph.jpg",
+  "pilares": "/covers/pilares.jpg",
+  "orgullo": "/covers/orgullo.jpg",
+  "casa-espiritus": "/covers/casa-espiritus.jpg",
+  "principito": "/covers/principito.jpg",
+};
+
+/** Maps normalized title fragments to cover asset keys. */
+const TITLE_TO_COVER: [string, keyof typeof COVER_ASSETS][] = [
+  ["quijote", "quijote"],
+  ["historia de espa", "historia-espana"],
+  ["mortadelo", "mortadelo"],
+  ["noticias del d", "noticias"],
+  ["noticias", "noticias"],
+  ["crónica de la ciencia", "cronica-ciencia"],
+  ["cronica de la ciencia", "cronica-ciencia"],
+  ["cien años", "cien-anos"],
+  ["cien anos", "cien-anos"],
+  ["asterix", "asterix"],
+  ["sombra del viento", "sombra-viento"],
+  ["1984", "1984"],
+  ["dune", "dune"],
+  ["rayuela", "rayuela"],
+  ["nombre de la rosa", "nombre-rosa"],
+  ["el aleph", "aleph"],
+  [" aleph", "aleph"],
+  ["pilares de la tierra", "pilares"],
+  ["orgullo y prejuicio", "orgullo"],
+  ["casa de los espíritus", "casa-espiritus"],
+  ["casa de los espiritus", "casa-espiritus"],
+  ["principito", "principito"],
 ];
 
 const TYPE_FALLBACKS: Record<string, string[]> = {
-  book: [
-    "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=600&q=80&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1512820790801-4159cc8fce0b?w=600&q=80&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1495446815901-a72963e844e8?w=600&q=80&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1524995997941-a1c2e315a42f?w=600&q=80&auto=format&fit=crop",
-  ],
-  comic: [
-    "https://images.unsplash.com/photo-1612036782185-39b4a8d2d2a2?w=600&q=80&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1612178537253-bccd4370593f?w=600&q=80&auto=format&fit=crop",
-  ],
-  podcast: [
-    "https://images.unsplash.com/photo-1478737276239-2f02a577ef88?w=600&q=80&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1590602847861-f357a7672b24?w=600&q=80&auto=format&fit=crop",
-  ],
-  news: [
-    "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&q=80&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80&auto=format&fit=crop",
-  ],
-  document: [
-    "https://images.unsplash.com/photo-1456513087680-9aaa5b645147?w=600&q=80&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=600&q=80&auto=format&fit=crop",
-  ],
+  book: [COVER_ASSETS.quijote, COVER_ASSETS.orgullo, COVER_ASSETS.principito, COVER_ASSETS.dune],
+  comic: [COVER_ASSETS.mortadelo, COVER_ASSETS.asterix],
+  podcast: [COVER_ASSETS["cronica-ciencia"]],
+  news: [COVER_ASSETS.noticias],
+  document: [COVER_ASSETS["historia-espana"]],
 };
 
 function hashString(value: string) {
@@ -54,22 +66,12 @@ function hashString(value: string) {
   return Math.abs(hash);
 }
 
-function findTitleCover(title: string) {
+export function findCoverByTitle(title: string) {
   const normalized = title.toLowerCase();
-  for (const [key, url] of BOOK_COVERS) {
-    if (normalized.includes(key)) return url;
+  for (const [fragment, key] of TITLE_TO_COVER) {
+    if (normalized.includes(fragment)) return COVER_ASSETS[key];
   }
   return null;
-}
-
-function enhanceUnsplashUrl(url: string) {
-  if (!url.includes("images.unsplash.com")) return url;
-  const parsed = new URL(url);
-  if (!parsed.searchParams.has("w")) parsed.searchParams.set("w", "600");
-  if (!parsed.searchParams.has("q")) parsed.searchParams.set("q", "80");
-  if (!parsed.searchParams.has("auto")) parsed.searchParams.set("auto", "format");
-  if (!parsed.searchParams.has("fit")) parsed.searchParams.set("fit", "crop");
-  return parsed.toString();
 }
 
 export function getTypeFallback(type?: string, seed = "default") {
@@ -82,8 +84,38 @@ export function resolveCoverUrl(
   title: string,
   type?: string,
 ) {
-  const titleCover = findTitleCover(title);
+  const titleCover = findCoverByTitle(title);
   if (titleCover) return titleCover;
-  if (coverUrl?.trim()) return enhanceUnsplashUrl(coverUrl.trim());
+
+  if (coverUrl?.trim()) {
+    const trimmed = coverUrl.trim();
+    if (trimmed.startsWith("/covers/")) return trimmed;
+    return trimmed;
+  }
+
   return getTypeFallback(type, title);
+}
+
+export function getCoverUrlForTitle(title: string) {
+  return findCoverByTitle(title) ?? COVER_ASSETS.quijote;
+}
+
+/** GitHub raw fallback when local /covers path is unavailable. */
+export const GITHUB_COVERS_BASE =
+  "https://raw.githubusercontent.com/HKStockDev/book-store/main/packages/web/public/covers";
+
+export function toGithubCoverUrl(localPath: string) {
+  if (!localPath.startsWith("/covers/")) return localPath;
+  return `${GITHUB_COVERS_BASE}/${localPath.slice("/covers/".length)}`;
+}
+
+export function resolveCoverFallback(
+  currentSrc: string,
+  title: string,
+  type?: string,
+) {
+  if (currentSrc.startsWith("/covers/")) return toGithubCoverUrl(currentSrc);
+  const titleCover = findCoverByTitle(title);
+  if (titleCover && titleCover !== currentSrc) return toGithubCoverUrl(titleCover);
+  return getTypeFallback(type, `${title}-fallback`);
 }
