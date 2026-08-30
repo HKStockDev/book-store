@@ -10,6 +10,42 @@ import type { ContentRibbonKind } from "@/lib/content-ribbons";
 import type { ContentItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+function FeaturedCard({
+  item,
+  primaryRibbon,
+}: {
+  item: ContentItem;
+  primaryRibbon: ContentRibbonKind;
+}) {
+  const label = item.genre ?? item.type;
+
+  return (
+    <Link
+      href={`/content/${item.id}`}
+      className="group relative w-36 shrink-0 snap-start overflow-hidden rounded-xl border border-border bg-card shadow-sm sm:w-44"
+    >
+      <ContentCover
+        coverUrl={item.cover_url}
+        title={item.title}
+        type={item.type}
+        ribbons={[primaryRibbon]}
+        ribbonSize="lg"
+        className="w-full"
+      />
+
+      <div className="pointer-events-none absolute inset-0 flex flex-col justify-end opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <div className="translate-y-4 bg-gradient-to-t from-[#0c1628]/95 via-[#0c1628]/55 to-transparent px-3 pb-3 pt-16 transition-transform duration-300 ease-out group-hover:translate-y-0">
+          <p className="text-[10px] font-medium uppercase tracking-wide text-[#e8c547]/80">{label}</p>
+          <h3 className="mt-1 line-clamp-2 text-sm font-semibold leading-snug text-white">{item.title}</h3>
+          {item.author && (
+            <p className="mt-0.5 line-clamp-1 text-xs text-white/70">{item.author}</p>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 function FeaturedRow({
   title,
   description,
@@ -35,23 +71,9 @@ function FeaturedRow({
         </div>
       </div>
 
-      <BookCarousel>
+      <BookCarousel autoplay>
         {items.map((item) => (
-          <Link
-            key={item.id}
-            href={`/content/${item.id}`}
-            className="group w-36 shrink-0 snap-start overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-lg sm:w-40"
-            title={item.title}
-          >
-            <ContentCover
-              coverUrl={item.cover_url}
-              title={item.title}
-              type={item.type}
-              ribbons={[primaryRibbon]}
-              ribbonSize="md"
-              className="w-full transition-transform duration-300 group-hover:scale-[1.03]"
-            />
-          </Link>
+          <FeaturedCard key={item.id} item={item} primaryRibbon={primaryRibbon} />
         ))}
       </BookCarousel>
     </div>
