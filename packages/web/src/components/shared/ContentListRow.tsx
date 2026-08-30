@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { ContentRibbonKind } from "@/lib/content-ribbons";
 import { ContentCover } from "./ContentCover";
 import { Badge } from "./PageHeader";
-import { ContentRibbonStrip } from "./ContentRibbon";
 import { CONTENT_TYPE_LABELS, cn, formatCurrency } from "@/lib/utils";
 
 export function ContentListRow({
@@ -36,11 +35,12 @@ export function ContentListRow({
         type={type}
         className="w-14 rounded-md"
         aspectClass="aspect-[3/4]"
+        ribbons={ribbons.slice(0, 1)}
+        ribbonSize="sm"
       />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           {type && <Badge>{CONTENT_TYPE_LABELS[type] ?? type}</Badge>}
-          <ContentRibbonStrip kinds={ribbons} />
         </div>
         <h3 className="mt-1 truncate font-semibold">{title}</h3>
         {author && <p className="truncate text-sm text-muted-foreground">{author}</p>}

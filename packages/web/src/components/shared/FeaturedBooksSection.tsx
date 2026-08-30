@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Sparkles, TrendingUp } from "lucide-react";
-import { ContentCard } from "@/components/shared/PageHeader";
-import { ContentRibbonStrip } from "@/components/shared/ContentRibbon";
+import Link from "next/link";
+import { BookCarousel } from "@/components/shared/BookCarousel";
+import { ContentCover } from "@/components/shared/ContentCover";
 import { api } from "@/lib/api";
 import type { ContentRibbonKind } from "@/lib/content-ribbons";
-import { getDisplayRibbons, RIBBON_META } from "@/lib/content-ribbons";
 import type { ContentItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -16,66 +16,49 @@ function FeaturedRow({
   icon,
   items,
   primaryRibbon,
-  ownedIds,
 }: {
   title: string;
   description: string;
   icon: React.ReactNode;
   items: ContentItem[];
   primaryRibbon: ContentRibbonKind;
-  ownedIds?: Set<string>;
 }) {
-  const ribbonMeta = RIBBON_META[primaryRibbon];
-
   return (
     <div className="rounded-xl border border-border bg-card/70 p-4 shadow-sm sm:p-5">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            {icon}
-          </div>
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-lg font-semibold">{title}</h2>
-              <span className="inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ring-border">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={ribbonMeta.src} alt="" className="h-3.5 w-3.5" aria-hidden />
-                {ribbonMeta.shortLabel}
-              </span>
-            </div>
-            <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
-          </div>
+      <div className="mb-4 flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          {icon}
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold">{title}</h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
         </div>
       </div>
 
-      <div className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-1 scrollbar-thin">
+      <BookCarousel>
         {items.map((item) => (
-          <div key={item.id} className="w-36 shrink-0 sm:w-40">
-            <ContentCard
-              item={item}
-              href={`/content/${item.id}`}
-              ownedIds={ownedIds}
-              primaryRibbon={primaryRibbon}
+          <Link
+            key={item.id}
+            href={`/content/${item.id}`}
+            className="group w-36 shrink-0 snap-start overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-lg sm:w-40"
+            title={item.title}
+          >
+            <ContentCover
+              coverUrl={item.cover_url}
+              title={item.title}
+              type={item.type}
+              ribbons={[primaryRibbon]}
+              ribbonSize="md"
+              className="w-full transition-transform duration-300 group-hover:scale-[1.03]"
             />
-            <div className="mt-2 px-1">
-              <p className="line-clamp-2 text-xs font-medium leading-snug">{item.title}</p>
-              {item.author && (
-                <p className="mt-0.5 line-clamp-1 text-[11px] text-muted-foreground">{item.author}</p>
-              )}
-              <ContentRibbonStrip
-                kinds={getDisplayRibbons(item, { contentId: item.id, ownedIds }, primaryRibbon)}
-                className="mt-1.5"
-              />
-            </div>
-          </div>
+          </Link>
         ))}
-      </div>
+      </BookCarousel>
     </div>
   );
 }
 
 export function FeaturedBooksSection({
-  ownedIds,
   hidden = false,
 }: {
   ownedIds?: Set<string>;
@@ -110,7 +93,6 @@ export function FeaturedBooksSection({
           icon={<Sparkles className="h-5 w-5" />}
           items={featured.new}
           primaryRibbon="new"
-          ownedIds={ownedIds}
         />
       )}
       {featured.recommended.length > 0 && (
@@ -120,7 +102,6 @@ export function FeaturedBooksSection({
           icon={<TrendingUp className="h-5 w-5" />}
           items={featured.recommended}
           primaryRibbon="recommended"
-          ownedIds={ownedIds}
         />
       )}
     </section>

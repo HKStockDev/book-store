@@ -14,6 +14,7 @@ export function ContentCover({
   aspectClass = "aspect-[3/4]",
   variant = "default",
   ribbons = [],
+  ribbonSize = "md",
 }: {
   coverUrl?: string | null;
   title: string;
@@ -22,6 +23,7 @@ export function ContentCover({
   aspectClass?: string;
   variant?: "default" | "hero";
   ribbons?: ContentRibbonKind[];
+  ribbonSize?: "sm" | "md" | "lg";
 }) {
   const resolved = resolveCoverUrl(coverUrl, title, type);
   const [src, setSrc] = useState(resolved);
@@ -56,8 +58,7 @@ export function ContentCover({
               className="h-full w-full object-cover"
               onError={handleError}
             />
-            {ribbons[0] && <ContentRibbon kind={ribbons[0]} position="left" size="lg" />}
-            {ribbons[1] && <ContentRibbon kind={ribbons[1]} position="right" size="lg" />}
+            {ribbons[0] && <ContentRibbon kind={ribbons[0]} size="lg" />}
           </div>
         </div>
         <div className="absolute -bottom-2 left-1/2 h-3 w-[88%] -translate-x-1/2 rounded-full bg-black/15 blur-md" />
@@ -75,8 +76,7 @@ export function ContentCover({
         onError={handleError}
         loading="lazy"
       />
-      {ribbons[0] && <ContentRibbon kind={ribbons[0]} position="left" size="md" />}
-      {ribbons[1] && <ContentRibbon kind={ribbons[1]} position="right" size="md" />}
+      {ribbons[0] && <ContentRibbon kind={ribbons[0]} size={ribbonSize} />}
     </div>
   );
 }

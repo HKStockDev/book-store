@@ -52,7 +52,7 @@ export function getContentRibbons(
   if (isFreeContent(item.price)) ribbons.push("free");
   if (isPopularContent(item.purchases)) ribbons.push("popular");
 
-  return ribbons.slice(0, 2);
+  return ribbons.slice(0, 1);
 }
 
 export function getDisplayRibbons(
@@ -60,10 +60,8 @@ export function getDisplayRibbons(
   context: RibbonContext = {},
   primaryRibbon?: ContentRibbonKind,
 ): ContentRibbonKind[] {
-  const auto = getContentRibbons(item, context);
-  if (!primaryRibbon) return auto;
-  const secondary = auto.filter((ribbon) => ribbon !== primaryRibbon)[0];
-  return secondary ? [primaryRibbon, secondary] : [primaryRibbon];
+  if (primaryRibbon) return [primaryRibbon];
+  return getContentRibbons(item, context);
 }
 
 export interface FeaturedCatalogItem extends RibbonSource {
@@ -108,42 +106,48 @@ export function selectRecommendedBooks<T extends FeaturedCatalogItem>(
 
 export const RIBBON_META: Record<
   ContentRibbonKind,
-  { label: string; shortLabel: string; src: string; alt: string }
+  { label: string; shortLabel: string; ribbonText: string; color: string; alt: string }
 > = {
   new: {
     label: "Nuevo",
     shortLabel: "Nuevo",
-    src: "/ribbons/ribbon-new.svg",
+    ribbonText: "NUEVO",
+    color: "#B91C1C",
     alt: "Nuevo",
   },
   free: {
     label: "Gratis",
     shortLabel: "Gratis",
-    src: "/ribbons/ribbon-free.svg",
+    ribbonText: "GRATIS",
+    color: "#15803D",
     alt: "Gratis",
   },
   owned: {
     label: "En biblioteca",
     shortLabel: "Tuyo",
-    src: "/ribbons/ribbon-owned.svg",
+    ribbonText: "TUYO",
+    color: "#6B4C2A",
     alt: "En tu biblioteca",
   },
   offline: {
     label: "Offline",
     shortLabel: "Offline",
-    src: "/ribbons/ribbon-offline.svg",
+    ribbonText: "OFFLINE",
+    color: "#1D4ED8",
     alt: "Disponible offline",
   },
   popular: {
     label: "Popular",
     shortLabel: "Top",
-    src: "/ribbons/ribbon-popular.svg",
+    ribbonText: "TOP",
+    color: "#C2410C",
     alt: "Contenido popular",
   },
   recommended: {
     label: "Recomendado",
     shortLabel: "Recom.",
-    src: "/ribbons/ribbon-recommended.svg",
+    ribbonText: "RECOM.",
+    color: "#7C3AED",
     alt: "Contenido recomendado",
   },
 };

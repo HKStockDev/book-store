@@ -8,7 +8,6 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { UserLayout } from "@/components/layout/UserLayout";
 import { Badge } from "@/components/shared/PageHeader";
 import { ContentCover } from "@/components/shared/ContentCover";
-import { ContentRibbonStrip } from "@/components/shared/ContentRibbon";
 import { api } from "@/lib/api";
 import { getContentRibbons } from "@/lib/content-ribbons";
 import { useAuthStore } from "@/lib/auth-store";
@@ -92,7 +91,6 @@ export default function ContentDetailPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <Badge>{CONTENT_TYPE_LABELS[item.type] ?? item.type}</Badge>
                 {item.integration && <Badge className="bg-primary/10 text-primary">{item.integration}</Badge>}
-                <ContentRibbonStrip kinds={ribbons} size="md" />
               </div>
               <h1 className="mt-2 text-3xl font-bold">{item.title}</h1>
               {item.author && <p className="text-muted-foreground">{item.author}</p>}
